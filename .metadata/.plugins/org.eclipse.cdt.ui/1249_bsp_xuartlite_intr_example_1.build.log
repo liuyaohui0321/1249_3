@@ -1,4 +1,4 @@
-16:04:05 **** Auto Build of configuration Debug for project 1249_bsp_xuartlite_intr_example_1 ****
+20:31:27 **** Build of configuration Debug for project 1249_bsp_xuartlite_intr_example_1 ****
 make all 
 'Building file: ../src/xuartlite_intr_example.c'
 'Invoking: MicroBlaze gcc compiler'
@@ -17,5 +17,5 @@ mb-size 1249_bsp_xuartlite_intr_example_1.elf  |tee "1249_bsp_xuartlite_intr_exa
 'Finished building: 1249_bsp_xuartlite_intr_example_1.elf.size'
 ' '
 
-16:04:06 Build Finished (took 412ms)
+20:31:27 Build Finished (took 473ms)
 

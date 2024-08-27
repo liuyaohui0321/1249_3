@@ -3,9 +3,9 @@
 <Block Addr="0x80000000" Context="JTAG-jsn-JTAG-SMT2-SULEE2306923-1390d093-0.MDM1.0" Size="-1">
 <Rendering ID="org.eclipse.debug.ui.rendering.hexint" Pane="org.eclipse.debug.ui.MemoryView.RenderingViewPane.1"/>
 </Block>
-<Block Addr="0x80001000" Context="JTAG-jsn-JTAG-SMT2-SULEE2306923-1390d093-0.MDM1.0" Size="-1">
-<Rendering ID="org.eclipse.debug.ui.rendering.hexint" Pane="org.eclipse.debug.ui.MemoryView.RenderingViewPane.1"/>
-</Block>
+<Block Addr="0x90000000" Context="JTAG-jsn-JTAG-SMT2-SULEE2306923-1390d093-0.MDM1.0" Size="-1"/>
+<Block Addr="0xC0000000" Context="JTAG-jsn-JTAG-SMT2-SULEE2306923-1390d093-0.MDM1.0" Size="-1"/>
+<Block Addr="0xDFFFFFFF" Context="JTAG-jsn-JTAG-SMT2-SULEE2306923-1390d093-0.MDM1.0" Size="-1"/>
 <Block Addr="0x90000000" Context="JTAG-jsn-JTAG-SMT2-210251A08870-1390d093-0.MDM1.0" Size="-1"/>
 <Block Addr="0x80000000" Context="JTAG-jsn-JTAG-SMT2-210251A08870-1390d093-0.MDM1.0" Size="-1"/>
 </Memory>

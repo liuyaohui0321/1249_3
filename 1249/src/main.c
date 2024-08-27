@@ -111,7 +111,8 @@ int main()
 		}
 		xil_printf(" Init All ok!\r\n");
 #endif
-
+//		run_cmd_d205('D',2);
+		run_cmd_d205_8x();
 //		Xil_ICacheEnable();
 //		Xil_DCacheEnable();
 	/* receive and process packets */
@@ -123,6 +124,8 @@ int main()
 //			rxflag=0;
 //		}
 //		run_cmd_d203(0);
+//		cmd_reply_a203(0x0,0xA2,0x1,0x11);
+//		run_cmd_f201(0x0);
 #if  1
 		memset(&CurMsg,0,sizeof(CurMsg));
 		GetMessage(&CurMsg);

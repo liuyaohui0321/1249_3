@@ -1144,7 +1144,7 @@ static FRESULT move_window (	/* Returns FR_OK or FR_DISK_ERR */
 #endif
 		if (res == FR_OK) {			/* Fill sector window with new data */
 			if (disk_read(fs->pdrv, (BYTE *)(0xA0001000), sect, 1) != RES_OK) {
-//				Xil_L1DCacheFlush(); //8.20 add
+				Xil_L1DCacheFlush(); //8.20 add
 				memcpy(fs->win,(BYTE *)(0xA0001000),SECTORSIZE*1);
 				memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 				sect = (LBA_t)0 - 1;	/* Invalidate window if read data is not valid */
