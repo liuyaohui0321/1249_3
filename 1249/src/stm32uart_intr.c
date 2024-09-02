@@ -63,6 +63,7 @@
 #include "xil_printf.h"
 #include "simple_dma.h"
 #include "cmd.h"
+#include "xuartlite_l.h"
 /************************** Constant Definitions *****************************/
 
 /*
@@ -80,6 +81,9 @@
  */
 #define TEST_BUFFER_SIZE        100
 
+#define UART_TX_BUFFER_BASE		(0x80000000 + 0x00900000)
+u8 *UartRxBufferPtr;
+
 
 /**************************** Type Definitions *******************************/
 
@@ -89,13 +93,7 @@
 
 /************************** Function Prototypes ******************************/
 
-int UartLiteIntrExample(u16 DeviceId);
-
 int SetupInterruptSystem(XUartLite *UartLitePtr);
-
-void SendHandler(void *CallBackRef, unsigned int EventData);
-
-void RecvHandler(void *CallBackRef, unsigned int EventData);
 
 /************************** Variable Definitions *****************************/
 
@@ -113,9 +111,9 @@ void RecvHandler(void *CallBackRef, unsigned int EventData);
  * The following buffers are used in this example to send and receive data
  * with the UartLite.
  */
-u8 SendBuffer[TEST_BUFFER_SIZE];
-u8 ReceiveBuffer[TEST_BUFFER_SIZE];
-
+//u8 SendBuffer[TEST_BUFFER_SIZE];
+//u8 ReceiveBuffer[TEST_BUFFER_SIZE];
+#define RX_NOEMPTY XUL_SR_RX_FIFO_VALID_DATA // 接收 FIFO 非空
 /*
  * The following counters are used to determine when the entire buffer has
  * been sent and received.
@@ -123,7 +121,145 @@ u8 ReceiveBuffer[TEST_BUFFER_SIZE];
 static volatile int TotalReceivedCount;
 static volatile int TotalSentCount;
 
+int UartLiteIntr(void)
+{
+	int Status;
+	UartRxBufferPtr = (u8 *)UART_TX_BUFFER_BASE;
+	/*
+	 * Initialize the UartLite driver so that it's ready to use.
+	 */
+	Status = XUartLite_Initialize(&UartLite, UARTLITE_DEVICE_ID);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
 
+	/*
+	 * Connect the UartLite to the interrupt subsystem such that interrupts can
+	 * occur. This function is application specific.
+	 */
+	Status = SetupInterruptSystem(&UartLite);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	/*
+	 * Enable the interrupt of the UartLite so that interrupts will occur.
+	 */
+	XUartLite_EnableInterrupt(&UartLite);
+
+	/*
+	 * Start receiving data before sending it since there is a loopback.
+	 */
+//	XUartLite_Recv(&UartLite, ReceiveBuffer, TEST_BUFFER_SIZE);
+//	while(1);
+	return XST_SUCCESS;
+}
+
+
+void uart_handler(void *CallbackRef)//中断处理函数
+{
+    u8 Read_data;
+    u32 isr_status;
+    XUartLite *InstancePtr= (XUartLite *)CallbackRef;
+    //读取状态寄存器
+    isr_status = XUartLite_ReadReg(InstancePtr->RegBaseAddress ,
+                                   XUL_STATUS_REG_OFFSET);
+    if(isr_status & RX_NOEMPTY){ //接收 FIFO 中有数据
+    	//读取数据
+        Read_data=XUartLite_ReadReg(InstancePtr->RegBaseAddress ,
+                                    XUL_RX_FIFO_OFFSET);
+        //发送数据
+        XUartLite_WriteReg(InstancePtr->RegBaseAddress ,
+                           XUL_TX_FIFO_OFFSET, Read_data);
+    }
+}
+
+
+
+/****************************************************************************/
+/**
+*
+* This function setups the interrupt system such that interrupts can occur
+* for the UartLite device. This function is application specific since the
+* actual system may or may not have an interrupt controller. The UartLite
+* could be directly connected to a processor without an interrupt controller.
+* The user should modify this function to fit the application.
+*
+* @param    UartLitePtr contains a pointer to the instance of the UartLite
+*           component which is going to be connected to the interrupt
+*           controller.
+*
+* @return   XST_SUCCESS if successful, otherwise XST_FAILURE.
+*
+* @note     None.
+*
+****************************************************************************/
+int SetupInterruptSystem(XUartLite *UartLitePtr)
+{
+
+	int Status;
+
+
+	/*
+	 * Initialize the interrupt controller driver so that it is ready to
+	 * use.
+	 */
+//	Status = XIntc_Initialize(&InterruptController, INTC_DEVICE_ID);
+//	if (Status != XST_SUCCESS) {
+//		return XST_FAILURE;
+//	}
+
+
+	/*
+	 * Connect a device driver handler that will be called when an interrupt
+	 * for the device occurs, the device driver handler performs the
+	 * specific interrupt processing for the device.
+	 */
+	Status = XIntc_Connect(&Intc, UARTLITE_INT_IRQ_ID,
+			   (XInterruptHandler)uart_handler,
+			   (void *)UartLitePtr);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	/*
+	 * Start the interrupt controller such that interrupts are enabled for
+	 * all devices that cause interrupts, specific real mode so that
+	 * the UartLite can cause interrupts through the interrupt controller.
+	 */
+	Status = XIntc_Start(&Intc, XIN_REAL_MODE);
+	if (Status != XST_SUCCESS) {
+		return XST_FAILURE;
+	}
+
+	/*
+	 * Enable the interrupt for the UartLite device.
+	 */
+	XIntc_Enable(&Intc, UARTLITE_INT_IRQ_ID);
+
+	/*
+	 * Initialize the exception table.
+	 */
+	Xil_ExceptionInit();
+
+	/*
+	 * Register the interrupt controller handler with the exception table.
+	 */
+	Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+			 (Xil_ExceptionHandler)XIntc_InterruptHandler,
+			 &Intc);
+
+	/*
+	 * Enable exceptions.
+	 */
+	Xil_ExceptionEnable();
+
+	return XST_SUCCESS;
+}
+
+
+
+#if  0   //old version
 int UartLiteIntr(void)
 {
 	int Status;
@@ -250,7 +386,7 @@ void RecvHandler(void *CallBackRef, unsigned int EventData)
 	{
 		i+=4;
 		g_slot_address = CW32(ReceiveBuffer[i+0],ReceiveBuffer[i+1],ReceiveBuffer[i+2],ReceiveBuffer[i+3]);
-		//发给逻辑
+		//锟斤拷锟斤拷锟竭硷拷
 	}
 }
 
@@ -334,6 +470,6 @@ int SetupInterruptSystem(XUartLite *UartLitePtr)
 
 	return XST_SUCCESS;
 }
-
+#endif
 
 

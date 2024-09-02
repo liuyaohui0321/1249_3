@@ -27,7 +27,8 @@ src/stm32uart_intr.o src/stm32uart_intr.o: ../src/stm32uart_intr.c \
  ../../1249_bsp/microblaze_1/include/xil_types.h ../src/fat/ff.h \
  ../src/fat/ffconf.h ../src/nhc_amba.h \
  ../../1249_bsp/microblaze_1/include/xstatus.h ../src/mem_test.h \
- ../src/xllfifo_drv.h ../src/FIFO.h
+ ../src/xllfifo_drv.h ../src/FIFO.h \
+ ../../1249_bsp/microblaze_1/include/xuartlite_l.h
 
 ../../1249_bsp/microblaze_1/include/xparameters.h:
 
@@ -98,3 +99,5 @@ src/stm32uart_intr.o src/stm32uart_intr.o: ../src/stm32uart_intr.c \
 ../src/xllfifo_drv.h:
 
 ../src/FIFO.h:
+
+../../1249_bsp/microblaze_1/include/xuartlite_l.h:

@@ -139,8 +139,8 @@ int cmd_parse(void)
 		int i=0;
 		uint32_t a;
 //		Xil_DCacheInvalidateRange((UINTPTR)pbuff, CMD_PACK_LEN);
-//		Xil_DCacheInvalidateRange((UINTPTR)CmdRxBufferPtr, CMD_PACK_LEN);
-		Xil_DCacheFlushRange((UINTPTR)CmdRxBufferPtr, MAX_PKT_LEN);
+		Xil_DCacheInvalidateRange((UINTPTR)CmdRxBufferPtr, CMD_PACK_LEN);
+//		Xil_DCacheFlushRange((UINTPTR)CmdRxBufferPtr, MAX_PKT_LEN);
 		int rev=CW32(CmdRxBufferPtr[i+0],CmdRxBufferPtr[i+1],CmdRxBufferPtr[i+2],CmdRxBufferPtr[i+3]);
 		if(0x55555555 != CW32(CmdRxBufferPtr[i+0],CmdRxBufferPtr[i+1],CmdRxBufferPtr[i+2],CmdRxBufferPtr[i+3]))
 			return -1;
@@ -436,8 +436,7 @@ int run_cmd_a201(StructMsg *pMsg)
 	file_cmd = CW32(pMsg->MsgData[i+0],pMsg->MsgData[i+1],pMsg->MsgData[i+2],pMsg->MsgData[i+3]);
 	i=i+4;
 	temp=i;   // 9.7 LYH
-	xil_printf("%s %d  file_cmd:0x%x\r\n", __FUNCTION__, __LINE__,file_cmd);
-//	i+=2;   // 1.31改   客户在文件名后加了两个字节的标志位
+	xil_printf("%s %d cmd:0x%x\r\n", __FUNCTION__, __LINE__,file_cmd);
 	for (x = 0; x < 1024; x++)
 	{
 			unicode_u16=(pMsg->MsgData[i++]|pMsg->MsgData[i++]<<8);
@@ -739,7 +738,8 @@ int run_cmd_a201(StructMsg *pMsg)
 				return -1;
 			}
 			cmd_reply_a203(0,0xA2,0x1,0x11);
-			usleep(100);
+//			cmd_reply_a204(0,0xA2,0x1,0x11);
+			usleep(100000);
 
 			wlen=write_len;
 			if(write_len>MAX_LEN)   //0x3FFE
@@ -888,6 +888,190 @@ int cmd_reply_a203(u32 packnum, u32 type, u32 id, u32 result)
 #if   1
 		ReplyStructA203Ack.HandType = 0xA2;
 		ReplyStructA203Ack.HandId = 0x3;
+		ReplyStructA203Ack.PackNum = 0;
+#endif
+		switch(type)
+		{
+			case  0xA2:
+				switch(id)
+				{
+					case  0x01:
+						if(result_a201==result)
+						{
+							ReplyStructA203Ack.AckResult = result_a201;
+						}
+						else
+						{
+							result_a201=result;
+							ReplyStructA203Ack.AckResult = result_a201;
+						}
+					break;
+
+					case  0x04:
+						if(result_a204==result)
+						{
+							ReplyStructA203Ack.AckResult = result_a204;
+						}
+						else
+						{
+							result_a204=result;
+							ReplyStructA203Ack.AckResult = result_a204;
+						}
+					break;
+
+					case  0x05:
+						if(result_a205==result)
+						{
+							ReplyStructA203Ack.AckResult = result_a205;
+						}
+						else
+						{
+							result_a205=result;
+							ReplyStructA203Ack.AckResult = result_a205;
+						}
+					break;
+					default:
+					break;
+				}
+			break;
+
+			case  0xB2:
+				if(result_b201==result)
+				{
+					ReplyStructA203Ack.AckResult = result_b201;
+				}
+				else
+				{
+					result_b201=result;
+					ReplyStructA203Ack.AckResult = result_b201;
+				}
+			break;
+
+			case  0xD2:
+				switch(id)
+				{
+					case  0x01:
+						if(result_d201==result)
+						{
+							ReplyStructA203Ack.AckResult = result_d201;
+						}
+						else
+						{
+							result_d201=result;
+							ReplyStructA203Ack.AckResult = result_d201;
+						}
+					break;
+
+					case  0x05:
+						if(result_d205==result)
+						{
+							ReplyStructA203Ack.AckResult = result_d205;
+						}
+						else
+						{
+							result_d205=result;
+							ReplyStructA203Ack.AckResult = result_d205;
+						}
+					break;
+
+					case  0x0A:
+						if(result_d20A==result)
+						{
+							ReplyStructA203Ack.AckResult = result_d20A;
+						}
+						else
+						{
+							result_d20A=result;
+							ReplyStructA203Ack.AckResult = result_d20A;
+						}
+					break;
+
+					default:
+					 break;
+				}
+			break;
+
+			case  0xF2:
+				if(result_f201==result)
+				{
+					ReplyStructA203Ack.AckResult = result_f201;
+				}
+				else
+				{
+					result_f201=result;
+					ReplyStructA203Ack.AckResult = result_f201;
+				}
+			break;
+
+			default:
+			break;
+		}
+		ReplyStructA203Ack.AckPackNum = packnum;
+		ReplyStructA203Ack.AckHandType = type;
+		ReplyStructA203Ack.AckHandId = id;
+
+		for(int i=0;i<4;i++)
+		{
+			ReplyStructA203Ack.backups[i]=0x0;
+		}
+
+		ReplyStructA203Ack.CheckCode = ReplyStructA203Ack.AckPackNum + \
+				ReplyStructA203Ack.AckHandType +ReplyStructA203Ack.AckHandId + \
+				ReplyStructA203Ack.AckResult;
+		ReplyStructA203Ack.Tail = 0xAAAAAAAA;
+
+#if 1    // 改变字节序
+		ReplyStructA203Ack.HandType = SW32(0xA2);
+		ReplyStructA203Ack.HandId =  SW32(0x03);
+		ReplyStructA203Ack.PackNum = SW32(0x0);   //need change
+		ReplyStructA203Ack.AckPackNum = SW32(ReplyStructA203Ack.AckPackNum);
+		ReplyStructA203Ack.AckHandType = SW32(ReplyStructA203Ack.AckHandType);
+		ReplyStructA203Ack.AckHandId = SW32(ReplyStructA203Ack.AckHandId);
+		ReplyStructA203Ack.CheckCode = SW32(ReplyStructA203Ack.CheckCode);
+		ReplyStructA203Ack.AckResult = SW32(ReplyStructA203Ack.AckResult);
+#endif
+		xil_printf("%s %d  sizeof(StructA203Ack)=%d\r\n", __FUNCTION__, __LINE__,sizeof(StructA203Ack));
+
+		if(flag_1x==1)
+		{
+			AxiDma.TxBdRing.HasDRE=1;
+			Status = XAxiDma_SimpleTransfer(&AxiDma,(UINTPTR)&ReplyStructA203Ack,
+					sizeof(StructA203Ack), XAXIDMA_DMA_TO_DEVICE);
+
+			if (Status != XST_SUCCESS)
+			{
+				return XST_FAILURE;
+			}
+//			flag_1x=0;
+		}
+		else if(flag_tcp==1)
+		{
+			AxiDma1.TxBdRing.HasDRE=1;
+			Status = XAxiDma_SimpleTransfer(&AxiDma1,(UINTPTR)&ReplyStructA203Ack,
+					sizeof(StructA203Ack), XAXIDMA_DMA_TO_DEVICE);
+
+			if (Status != XST_SUCCESS)
+			{
+				return XST_FAILURE;
+			}
+//			flag_tcp=0;
+		}
+		xil_printf("%s %d result:0x%x\r\n", __FUNCTION__, __LINE__,result);
+
+		return 0;
+}
+
+int cmd_reply_a204(u32 packnum, u32 type, u32 id, u32 result)
+{
+		int Status;
+		StructA203Ack ReplyStructA203Ack;
+//		xil_printf("%s %d\r\n", __FUNCTION__, __LINE__);
+		ReplyStructA203Ack.Head = 0x55555555;
+		ReplyStructA203Ack.SrcId = SRC_ID;
+		ReplyStructA203Ack.DestId = DEST_ID;
+#if   1
+		ReplyStructA203Ack.HandType = 0xA2;
+		ReplyStructA203Ack.HandId = 0x4;
 		ReplyStructA203Ack.PackNum = 0;
 #endif
 		switch(type)
@@ -2537,7 +2721,6 @@ int run_cmd_d203(StructMsg *pMsg)
 				len  =DestinationBuffer[1];  // 写入数据的长度
 //				buff =0x80000000;  // 保存写入数据的DDR地址
 //				len  =0x20000000;  // 写入数据的长度
-
 				if(buff==0x3C3CBCBC)		// 3.19号改 by lyh
 				{
 					xil_printf("I/O Write Finish!\r\n");
@@ -2624,7 +2807,7 @@ int run_cmd_d205(BYTE* name,uint8_t mode)
 	  int br;
 	  uint32_t  r_count=0,cmd_len=0;;
 	  uint32_t  MODE=0;
-	  uint32_t  buff_r=(void *)(0x90000000);
+	  uint32_t  buff_r=(void *)(0x80000000);
 
 	  xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 	  switch(mode)
@@ -2644,8 +2827,8 @@ int run_cmd_d205(BYTE* name,uint8_t mode)
 	  	  default:
 			 break;
 	  }
-//	  ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
-	  ret = f_open(&rfile,"D", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
+	  ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
+//	  ret = f_open(&rfile,"D", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
 	  if (ret != FR_OK)
 	  {
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
@@ -2767,7 +2950,7 @@ int run_cmd_d205_2(BYTE* name,int read_time,uint8_t mode)
 	 int br;
 	 uint32_t  r_count=0,cmd_len=0;
 	 uint32_t  MODE=0;
-	 uint32_t  buff_r=(void *)(0x90000000);
+	 uint32_t  buff_r=(void *)(0x80000000);
 	 int Reread_time=0;
 	 xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 	 switch(mode)
@@ -2977,14 +3160,17 @@ int run_cmd_d205_8x(BYTE* name)
 			DestinationBuffer_1[1]=buff_r;
 //			XLLFIFO_SysInit();
 //			Xil_L1DCacheFlush();
-
-			ret = TxSend(DestinationBuffer_1,8);
-			if (ret != XST_SUCCESS)
+			if(r_count>20)
 			{
-				 xil_printf("TxSend Failed! ret=%d\r\n", ret);
-				 return ret;
+				ret = TxSend(DestinationBuffer_1,8);
+				if (ret != XST_SUCCESS)
+				{
+					 xil_printf("TxSend Failed! ret=%d\r\n", ret);
+					 return ret;
+				}
 			}
-			if(r_count>3)
+//			if(r_count>2)
+			if(r_count>20)
 			{
 				do
 				{
@@ -3051,7 +3237,7 @@ int run_cmd_d205_2_8x(BYTE* name,int read_time)
 	 int br;
 	 uint32_t  r_count=0,cmd_len=0;
 	 uint32_t  MODE=0;
-	 uint32_t  buff_r=(void *)(0x90000000);
+	 uint32_t  buff_r=(void *)(0x80000000);
 	 int Reread_time=0;
 	 xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 
@@ -3115,6 +3301,7 @@ int run_cmd_d205_2_8x(BYTE* name,int read_time)
 				 xil_printf("TxSend Failed! ret=%d\r\n", ret);
 				 return ret;
 			}
+			xil_printf("buff_r=%x len=%lu \n\r",buff_r,len);
 			if(r_count>2)
 			{
 				do
@@ -3145,6 +3332,7 @@ int run_cmd_d205_2_8x(BYTE* name,int read_time)
 					DestinationBuffer_1[0]=DUMMY;
 				    DestinationBuffer_1[1]=READ_FINSHED;
 				    r_count=0;
+				    buff_r=(void *)(0x80000000);
 				    ret = TxSend(DestinationBuffer_1,8);
 				    if (ret != XST_SUCCESS)
 				    {
@@ -3240,11 +3428,12 @@ int run_cmd_d204(StructMsg *pMsg)
 			switch(x2)
 			{
 				case 0x0:
-					run_cmd_d205(cmd_str_11,x1);
+					run_cmd_d205(cmd_str_11,1);
 				break;
 
 				case 0x1:
-					run_cmd_d205_2(cmd_str_11,Read_time,x1);
+//					run_cmd_d205_2(cmd_str_11,Read_time,x1);
+					run_cmd_d205_2_8x(cmd_str_11,Read_time);
 				break;
 
 				default:
@@ -3329,7 +3518,7 @@ int run_cmd_d208(BYTE* name,uint8_t mode)
 	  int br;
 	  uint32_t  r_count=0,cmd_len=0;;
 	  uint32_t  len,MODE=0;
-	  uint32_t  buff_r=(void *)(0x90000000);
+	  uint32_t  buff_r=(void *)(0x80000000);
 
 	  xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 	  switch(mode)
@@ -3353,18 +3542,18 @@ int run_cmd_d208(BYTE* name,uint8_t mode)
 			//cmd_reply_a203_to_a201(pMsg->PackNum,pMsg->HandType,pMsg->HandId,0x10);  // lyh 2023.8.15
 			return ret;
 	  }
-	  size=(f_size(&rfile)/4+1)*4;
+	  size=((f_size(&rfile)%4)==0?f_size(&rfile):(f_size(&rfile)/4+1)*4);
 	  len=size;
-	  if(size>0x8000000)
+	  if(size>Read_Packet_Size)
 	  {
-		  time=size/0x8000000+1;
-		  len=0x8000000;
-		  LastPack_Size=((size%0x8000000)/4+1)*4;
-		  if((size%0x8000000)==0)
+		  time=size/Read_Packet_Size+1;
+		  len=Read_Packet_Size;
+		  LastPack_Size=((size%Read_Packet_Size)/4+1)*4;
+		  if((size%Read_Packet_Size)==0)
 		  {
-			  time=size/0x8000000;
-			  len=0x8000000;
-			  LastPack_Size=0x8000000;
+			  time=size/Read_Packet_Size;
+			  len=Read_Packet_Size;
+			  LastPack_Size=Read_Packet_Size;
 		  }
 	  }
 	  //告诉fpga切换模式
