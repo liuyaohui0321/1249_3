@@ -3109,6 +3109,7 @@ int run_cmd_d205_8x(BYTE* name)
 	  xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 //	  ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
 	  ret = f_open(&rfile,"D", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
+//	  ret = f_open(&rfile,"111", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
 	  if (ret != FR_OK)
 	  {
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
@@ -3160,17 +3161,17 @@ int run_cmd_d205_8x(BYTE* name)
 			DestinationBuffer_1[1]=buff_r;
 //			XLLFIFO_SysInit();
 //			Xil_L1DCacheFlush();
-			if(r_count>20)
-			{
+//			if(r_count>20)
+//			{
 				ret = TxSend(DestinationBuffer_1,8);
 				if (ret != XST_SUCCESS)
 				{
 					 xil_printf("TxSend Failed! ret=%d\r\n", ret);
 					 return ret;
 				}
-			}
-//			if(r_count>2)
-			if(r_count>20)
+//			}
+			if(r_count>2)
+//			if(r_count>20)
 			{
 				do
 				{
@@ -3429,6 +3430,7 @@ int run_cmd_d204(StructMsg *pMsg)
 			{
 				case 0x0:
 					run_cmd_d205(cmd_str_11,1);
+//					run_cmd_d205_8x(cmd_str_11);
 				break;
 
 				case 0x1:

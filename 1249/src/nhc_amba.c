@@ -938,80 +938,6 @@ uint8_t io_write(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 	return 0x02;
 }
 
-uint8_t io_write1(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len,uint32_t nlba, uint32_t dsm)
-{
-
-	 uint32_t cmd_cdw[16];
-	 uint8_t  sts;
-	 uint8_t  i,j;
-	 static uint32_t full_wr_cnt = 0;
-	 slba = slba/512/nhc_num;
-	 i=0;
-	 while(i<nlba)
-	 {
-		for(j=0;j<nhc_num;j++)
-		{
-			// Command Submission
-			cmd_cdw[0]  = 0x80350081;
-			cmd_cdw[1]  = nsid;
-			cmd_cdw[2]  = 0x0;
-			cmd_cdw[3]  = 0x0;
-			cmd_cdw[4]  = 0x0;
-			cmd_cdw[5]  = 0x0;
-	//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*U_BLK_SIZE/nhc_num;   // 9.27改
-			cmd_cdw[6]  = addr + (j%(nhc_num/DDR_NUM))*len/nhc_num;
-			cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
-			cmd_cdw[8]  = 0x0;
-			cmd_cdw[9]  = 0x0;
-			cmd_cdw[10] = (uint32_t) (slba >> 0);
-			cmd_cdw[11] = (uint32_t) (slba >> 32);
-			cmd_cdw[12] = len/512/nhc_num;
-	//		cmd_cdw[12] = len/512/nhc_num*2*2;
-	//		cmd_cdw[12] = len/512/nhc_num*2;
-		//			cmd_cdw[12] = 64;
-			cmd_cdw[13] = dsm & 0xFF;
-			cmd_cdw[14] = 0x0;
-			cmd_cdw[15] = 0x0;
-
-			sts = nhc_cmd_sub(j,cmd_cdw);////Previously, sub was behind while
-			if ((nhc_num==1 || j == nhc_num-1) && (sts == 1))
-			{
-				i=i+1;
-				j=j+1;
-	//			slba = slba + U_BLK_LBA_CNT/nhc_num;
-				slba = slba +len/512/nhc_num;
-				if (addr < (0x9F000000))
-				{
-					addr+=len/DDR_NUM;
-				}
-				else
-				{
-					addr= MEM_DDR4_BASE;
-				}
-
-	//			if (addr >= (0xBFFFFFFF-len/DDR_NUM))
-	//				addr = 0x80000000;
-	//			else
-	//				addr = addr + len/DDR_NUM;
-			}
-			else if (sts == 1)
-			{
-				j=j+1;
-			}
-			else
-			{
-				sts = nhc_cmd_sts(j);
-			}
-		}
-		if (addr == DDR4_START_ADDR)
-		{
-			full_wr_cnt = full_wr_cnt + 1;
-	//			xil_printf("Have write full ddr area.full write cnt is %d.\n",full_wr_cnt);
-		}
-	}//while
-
-	return 0x02;
-}
 
 uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm)
 {
@@ -1020,9 +946,17 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 	uint8_t  sts;
 	uint8_t  i,j;
 	static uint32_t full_wr_cnt = 0;
+	uint64_t slba_1=0;
+	uint32_t LEN=0;
+	uint32_t LEN_1=0;
 //	slba = slba/512/nhc_num*2; //6.13改
 //	slba = slba/512/nhc_num;
-	slba = 2*slba/512/8;
+//	slba = 2*slba/512/8;
+	slba = slba/512/6;
+	slba_1= (slba/512)%6;
+	LEN=len/512/6;
+	LEN_1=(len/512)%6;
+
 	for(i=0;i<nhc_num;)
 	{
 		// Command Submission
@@ -1033,9 +967,9 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 		cmd_cdw[4]  = 0x0;
 		cmd_cdw[5]  = 0x0;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;   //6.13改
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/8;
+//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/6;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
-//		cmd_cdw[6]  = convertToMultipleOfSix(addr + (i%(nhc_num/DDR_NUM))*len/nhc_num);
+		cmd_cdw[6]  = convertToMultipleOfSix(addr + (i%(nhc_num/DDR_NUM))*len/6);
 		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
 		cmd_cdw[8]  = 0x0;
 		cmd_cdw[9]  = 0x0;
@@ -1047,7 +981,10 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 //			cmd_cdw[12]  = len/512/4;
 //		else
 //			cmd_cdw[12]  = len/512/8;
-		cmd_cdw[12]  = len/512/4;
+		if(i%3==2)
+			cmd_cdw[12]  = convertToMultipleOfSix(LEN+LEN_1);
+		else
+			cmd_cdw[12]  = convertToMultipleOfSix(LEN);
 		cmd_cdw[13] = dsm & 0xFF;
 		cmd_cdw[14] = 0x0;
 		cmd_cdw[15] = 0x0;
@@ -1062,6 +999,7 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 			sts = nhc_cmd_sts(i);
 		}
 	}
+
 //	if (addr == DDR4_START_ADDR)
 //	{
 //	 	full_wr_cnt = full_wr_cnt + 1;
@@ -1112,8 +1050,10 @@ uint8_t io_write3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 
 	uint32_t cmd_cdw[16];
 	uint8_t  sts;
-	uint8_t  i;
-	slba = slba/512/nhc_num;
+	uint8_t  i,j;
+	static uint32_t full_wr_cnt = 0;
+	slba = 2*slba/512/8;
+
 	for(i=0;i<nhc_num;)
 	{
 		// Command Submission
@@ -1123,14 +1063,21 @@ uint8_t io_write3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 		cmd_cdw[3]  = 0x0;
 		cmd_cdw[4]  = 0x0;
 		cmd_cdw[5]  = 0x0;
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
+//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;   //6.13改
+		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/8;
+//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
 //		cmd_cdw[6]  = convertToMultipleOfSix(addr + (i%(nhc_num/DDR_NUM))*len/nhc_num);
 		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
 		cmd_cdw[8]  = 0x0;
 		cmd_cdw[9]  = 0x0;
 		cmd_cdw[10] = (uint32_t) (slba >> 0);
 		cmd_cdw[11] = (uint32_t) (slba >> 32);
-		cmd_cdw[12] = len/512/nhc_num;
+//		cmd_cdw[12] = len/512/nhc_num*2;
+//		cmd_cdw[12] = len/512/nhc_num;
+		if(i%3==2)
+			cmd_cdw[12]  = len/512/4;
+		else
+			cmd_cdw[12]  = len/512/8;
 		cmd_cdw[13] = dsm & 0xFF;
 		cmd_cdw[14] = 0x0;
 		cmd_cdw[15] = 0x0;
@@ -1146,6 +1093,11 @@ uint8_t io_write3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 		}
 	}
 
+//	if (addr == DDR4_START_ADDR)
+//	{
+//	 	full_wr_cnt = full_wr_cnt + 1;
+////		xil_printf("Have write full ddr area.full write cnt is %d.\n",full_wr_cnt);
+//	}
 	// Command Status
 		while (queue_rptr != queue_wptr)
 		{
@@ -1171,7 +1123,7 @@ uint8_t io_write3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 			if (sts == 3)
 				return sts;
 		}
-	    while (queue5_rptr != queue5_wptr)
+		while (queue5_rptr != queue5_wptr)
 		{
 			sts = nhc_cmd_sts(4);
 			if (sts == 3)
@@ -1183,7 +1135,7 @@ uint8_t io_write3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 			if (sts == 3)
 				return sts;
 		}
-	return 0x02;
+		return 0x02;
 }
 // *********************************************************************************
 // I/O Read
@@ -1420,7 +1372,14 @@ uint8_t io_read2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 
 //	slba = slba/512/nhc_num*2;
 //	slba = slba/512/nhc_num;
-	slba = 2*slba/512/8;
+	uint64_t slba_1=0;
+	uint32_t LEN=0;
+	uint32_t LEN_1=0;
+	slba = slba/512/6;
+	slba_1= (slba/512)%6;
+	LEN=len/512/6;
+	LEN_1=(len/512)%6;
+//	slba = 2*slba/512/8;
 	for(i=0;i<nhc_num;)
 	{
 //		if (i == 0)
@@ -1434,7 +1393,7 @@ uint8_t io_read2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 		cmd_cdw[5]  = 0x0;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/8;
+		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/6;
 		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
 		cmd_cdw[8]  = 0x0;
 		cmd_cdw[9]  = 0x0;
@@ -1443,9 +1402,11 @@ uint8_t io_read2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 //		cmd_cdw[12] = len/512/nhc_num*2;
 //		cmd_cdw[12] = len/512/nhc_num;
 		if(i%3==2)
-			cmd_cdw[12]  = len/512/4;
+//			cmd_cdw[12]  = len/512/4;
+			cmd_cdw[12]  = LEN+LEN_1;
 		else
-			cmd_cdw[12]  = len/512/8;
+//			cmd_cdw[12]  = len/512/8;
+			cmd_cdw[12]  = LEN;
 //		cmd_cdw[12] = convertToMultipleOfSix(len/512/nhc_num);
 		cmd_cdw[13] = dsm & 0xFF;
 		cmd_cdw[14] = 0x0;
@@ -1512,6 +1473,100 @@ uint8_t io_read3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 
 //	slba = 2*slba/512/nhc_num;
 //	slba = slba/512/nhc_num;
+	uint64_t slba_1=0;
+	uint32_t LEN=0;
+	uint32_t LEN_1=0;
+	slba = slba/512/6;
+	slba_1= (slba/512)%6;
+	LEN=len/512/6;
+	LEN_1=(len/512)%6;
+//	slba = 2*slba/512/8;
+	for(i=0;i<nhc_num;)
+	{
+		cmd_cdw[0]  = 0x80350082;
+		cmd_cdw[1]  = nsid;
+		cmd_cdw[2]  = 0x0;
+		cmd_cdw[3]  = 0x0;
+		cmd_cdw[4]  = 0x0;
+		cmd_cdw[5]  = 0x0;
+//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;
+//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
+		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/6;
+		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
+		cmd_cdw[8]  = 0x0;
+		cmd_cdw[9]  = 0x0;
+		cmd_cdw[10] = (uint32_t) (slba >> 0);
+		cmd_cdw[11] = (uint32_t) (slba >> 32);
+//		cmd_cdw[12] = len/512/nhc_num*2;
+//		cmd_cdw[12] = len/512/nhc_num;
+		if(i%3==2)
+//			cmd_cdw[12]  = len/512/4;
+			cmd_cdw[12]  = LEN+LEN_1;
+		else
+//			cmd_cdw[12]  = len/512/8;
+			cmd_cdw[12]  = LEN;
+//		cmd_cdw[12] = convertToMultipleOfSix(len/512/nhc_num);
+		cmd_cdw[13] = dsm & 0xFF;
+		cmd_cdw[14] = 0x0;
+		cmd_cdw[15] = 0x0;
+
+		sts = nhc_cmd_sub(i,cmd_cdw);
+		if(sts == 1)
+		{
+			i+=1;
+		}
+		else
+		{
+			sts = nhc_cmd_sts(i);
+		}
+	}
+
+	// Command Status
+		while (queue_rptr != queue_wptr)
+		{
+			sts = nhc_cmd_sts(0);
+			if (sts == 3)
+				return sts;
+		}
+		while (queue2_rptr != queue2_wptr)
+		{
+			sts = nhc_cmd_sts(1);
+			if (sts == 3)
+				return sts;
+		}
+		while (queue3_rptr != queue3_wptr)
+		{
+			sts = nhc_cmd_sts(2);
+			if (sts == 3)
+				return sts;
+		}
+		while (queue4_rptr != queue4_wptr)
+		{
+			sts = nhc_cmd_sts(3);
+			if (sts == 3)
+				return sts;
+		}
+		while (queue5_rptr != queue5_wptr)
+		{
+			sts = nhc_cmd_sts(4);
+			if (sts == 3)
+				return sts;
+		}
+		while (queue6_rptr != queue6_wptr)
+		{
+			sts = nhc_cmd_sts(5);
+			if (sts == 3)
+				return sts;
+		}
+	return 0x02;
+}
+
+uint8_t io_read4(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm)
+{
+	uint32_t cmd_cdw[16];
+	uint8_t  sts;
+	uint8_t  i,j;
+	static uint32_t full_rd_cnt = 0;
 	slba = 2*slba/512/8;
 	for(i=0;i<nhc_num;)
 	{
@@ -1588,87 +1643,7 @@ uint8_t io_read3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 			if (sts == 3)
 				return sts;
 		}
-	return 0x02;
-}
-
-uint8_t io_read4(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm)
-{
-	uint32_t cmd_cdw[16];
-	uint8_t  sts;
-	uint8_t  i,j;
-	static uint32_t full_rd_cnt = 0;
-
-	slba = slba/512/nhc_num;
-	for(i=0;i<nhc_num;)
-	{
-		cmd_cdw[0]  = 0x80350082;
-		cmd_cdw[1]  = nsid;
-		cmd_cdw[2]  = 0x0;
-		cmd_cdw[3]  = 0x0;
-		cmd_cdw[4]  = 0x0;
-		cmd_cdw[5]  = 0x0;
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
-		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
-		cmd_cdw[8]  = 0x0;
-		cmd_cdw[9]  = 0x0;
-		cmd_cdw[10] = (uint32_t) (slba >> 0);
-		cmd_cdw[11] = (uint32_t) (slba >> 32);
-//		cmd_cdw[12] = len/512/nhc_num*2;
-		cmd_cdw[12] = len/512/nhc_num;
-//		cmd_cdw[12] = convertToMultipleOfSix(len/512/nhc_num);
-		cmd_cdw[13] = dsm & 0xFF;
-		cmd_cdw[14] = 0x0;
-		cmd_cdw[15] = 0x0;
-
-		sts = nhc_cmd_sub(i,cmd_cdw);
-		if(sts == 1)
-		{
-			i+=1;
-		}
-		else
-		{
-			sts = nhc_cmd_sts(i);
-		}
-	}
-
-	// Command Status
-		while (queue_rptr != queue_wptr)
-		{
-			sts = nhc_cmd_sts(0);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue2_rptr != queue2_wptr)
-		{
-			sts = nhc_cmd_sts(1);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue3_rptr != queue3_wptr)
-		{
-			sts = nhc_cmd_sts(2);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue4_rptr != queue4_wptr)
-		{
-			sts = nhc_cmd_sts(3);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue5_rptr != queue5_wptr)
-		{
-			sts = nhc_cmd_sts(4);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue6_rptr != queue6_wptr)
-		{
-			sts = nhc_cmd_sts(5);
-			if (sts == 3)
-				return sts;
-		}
-	return 0x02;
+		return 0x02;
 }
 uint64_t convert1ToMultipleOfSix(uint64_t num)
 {
@@ -1681,9 +1656,9 @@ uint64_t convert1ToMultipleOfSix(uint64_t num)
 
 uint32_t convertToMultipleOfSix(uint32_t num)
 {
-	uint32_t remainder = num % 64;
+	uint32_t remainder = num % 32;
     if (remainder != 0) {
-        num += 64 - remainder;
+        num += 32 - remainder;
     }
     return num;
 }

@@ -1,6 +1,54 @@
-10:04:24 **** Incremental Build of configuration Debug for project 1249 ****
+19:02:58 **** Auto Build of configuration Debug for project 1249 ****
 make all 
-make: Nothing to be done for 'all'.
+'Building file: ../src/fat/diskio.c'
+'Invoking: MicroBlaze gcc compiler'
+mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/fat/diskio.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/fat/diskio.d" -MT"src/fat/diskio.o" -o "src/fat/diskio.o" "../src/fat/diskio.c"
+../src/fat/diskio.c: In function 'disk_read':
+../src/fat/diskio.c:62:5: warning: implicit declaration of function 'io_read4'; did you mean 'io_read2'? [-Wimplicit-function-declaration]
+  if(io_read4(NHC_NUM,0x1, buff,slba, (uint32_t)len, 0x0) != 0x2)
+     ^~~~~~~~
+     io_read2
+../src/fat/diskio.c: In function 'disk_read1':
+../src/fat/diskio.c:84:5: warning: implicit declaration of function 'io_read3'; did you mean 'io_read2'? [-Wimplicit-function-declaration]
+  if(io_read3(NHC_NUM,0x1, buff,slba, (uint32_t)len, 0x0) != 0x2)
+     ^~~~~~~~
+     io_read2
+../src/fat/diskio.c: In function 'disk_write':
+../src/fat/diskio.c:125:28: warning: passing argument 3 of 'io_write2' makes integer from pointer without a cast [-Wint-conversion]
+  if(io_write2(NHC_NUM,0x1, buff,sector*SECTORSIZE, (uint32_t)(count*SECTORSIZE), 0x0) != 0x2)//lyh
+                            ^~~~
+In file included from ../src/fat/diskio.c:12:
+../src/fat/../nhc_amba.h:90:60: note: expected 'uint32_t' {aka 'long unsigned int'} but argument is of type 'const BYTE *' {aka 'const unsigned char *'}
+ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm);
+                                                   ~~~~~~~~~^~~~
+../src/fat/diskio.c: In function 'disk_write1':
+../src/fat/diskio.c:141:5: warning: implicit declaration of function 'io_write3'; did you mean 'io_write2'? [-Wimplicit-function-declaration]
+  if(io_write3(NHC_NUM,0x1, buff,sector*SECTORSIZE, (uint32_t)(count*SECTORSIZE), 0x0) != 0x2)//lyh
+     ^~~~~~~~~
+     io_write2
+../src/fat/diskio.c: In function 'disk_ioctl':
+../src/fat/diskio.c:161:6: warning: unused variable 'result' [-Wunused-variable]
+  int result;
+      ^~~~~~
+../src/fat/diskio.c:160:10: warning: variable 'res' set but not used [-Wunused-but-set-variable]
+  DRESULT res;
+          ^~~
+../src/fat/diskio.c:182:1: warning: control reaches end of non-void function [-Wreturn-type]
+ }
+ ^
+'Finished building: ../src/fat/diskio.c'
+' '
+'Building target: 1249.elf'
+'Invoking: MicroBlaze gcc linker'
+mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../1249_bsp/microblaze_1/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -Wl,--gc-sections -o "1249.elf"  ./src/fat/diskio.o ./src/fat/ff.o ./src/fat/ffsystem.o ./src/fat/ffunicode.o  ./src/FIFO.o ./src/alloc.o ./src/cmd.o ./src/main.o ./src/mem_test.o ./src/nhc_amba.o ./src/platform.o ./src/ring_buffer.o ./src/simple_dma.o ./src/stm32uart_intr.o ./src/xllfifo_polling_example.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
+'Finished building target: 1249.elf'
+' '
+'Invoking: MicroBlaze Print Size'
+mb-size 1249.elf  |tee "1249.elf.size"
+   text	   data	    bss	    dec	    hex	filename
+ 409284	   1992	14828828	15240104	 e88ba8	1249.elf
+'Finished building: 1249.elf.size'
+' '
 
-10:04:24 Build Finished (took 162ms)
+19:02:59 Build Finished (took 468ms)
 

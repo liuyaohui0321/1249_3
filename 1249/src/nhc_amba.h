@@ -14,22 +14,8 @@
 
 // NVMe Host IP Base Address
 
-//#define  NHC_BASE          0x50010000  // NVMe1
-//#define  NHC2_BASE         0x50020000  // NVMe2
-//#define  NHC3_BASE         0x50030000  // NVMe3
-//#define  NHC4_BASE         0x50040000  // NVMe4
-//#define  NHC5_BASE         0x50050000  // NVMe5
-//#define  NHC6_BASE         0x50060000  // NVMe6
-
-//#define  NHC_BASE          0x50010000  // NVMe1
-//#define  NHC2_BASE         0x50020000  // NVMe2
-//#define  NHC3_BASE         0x50040000  // NVMe3
-//#define  NHC4_BASE         0x50050000  // NVMe4
-//#define  NHC5_BASE         0x50040000  // NVMe5
-//#define  NHC6_BASE         0x50050000  // NVMe6
 
 #define  NHC_BASE          0x44a60000  // NVMe1
-//#define  NHC_BASE          0x44a10000  // NVMe1
 #define  NHC2_BASE         0x44a10000  // NVMe2
 #define  NHC3_BASE         0x44a20000  // NVMe3
 #define  NHC4_BASE         0x44a30000  // NVMe4

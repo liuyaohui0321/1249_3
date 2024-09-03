@@ -1071,7 +1071,7 @@ static FRESULT sync_window (	/* Returns FR_OK or FR_DISK_ERR */
 	if (fs->wflag) {	/* Is the disk access window dirty? */
 		memcpy((BYTE *)(0xA0001000),fs->win,SECTORSIZE*1);
 //		Xil_L1DCacheFlush(); //8.20 add
-		if (disk_write(fs->pdrv,(BYTE *)(0xA0001000), fs->winsect, 1) == RES_OK) {	/* Write it back into the volume */
+		if (disk_write1(fs->pdrv,(BYTE *)(0xA0001000), fs->winsect, 1) == RES_OK) {	/* Write it back into the volume *///9.3
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 			fs->wflag = 0;	/* Clear window dirty flag */
 			if (fs->winsect - fs->fatbase < fs->fsize) {	/* Is it in the 1st FAT? */
@@ -1079,7 +1079,7 @@ static FRESULT sync_window (	/* Returns FR_OK or FR_DISK_ERR */
 				{
 					memcpy((BYTE *)(0xA0001000),fs->win,SECTORSIZE*1);
 //					Xil_L1DCacheFlush(); //8.20 add
-					disk_write(fs->pdrv, (BYTE *)(0xA0001000), fs->winsect + fs->fsize, 1);	/* Reflect it to 2nd FAT if needed */
+					disk_write1(fs->pdrv, (BYTE *)(0xA0001000), fs->winsect + fs->fsize, 1);	/* Reflect it to 2nd FAT if needed *///9.3
 					memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 				}
 				
@@ -1143,7 +1143,8 @@ static FRESULT move_window (	/* Returns FR_OK or FR_DISK_ERR */
 		res = sync_window(fs);		/* Flush the window */
 #endif
 		if (res == FR_OK) {			/* Fill sector window with new data */
-			if (disk_read(fs->pdrv, (BYTE *)(0xA0001000), sect, 1) != RES_OK) {
+//			if (disk_read(fs->pdrv, (BYTE *)(0xA0001000), sect, 1) != RES_OK) {//9.3
+			if (disk_read2(fs->pdrv, (BYTE *)(0xA0001000), sect, 1) != RES_OK) {
 				Xil_L1DCacheFlush(); //8.20 add
 				memcpy(fs->win,(BYTE *)(0xA0001000),SECTORSIZE*1);
 				memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
@@ -1743,7 +1744,7 @@ static FRESULT dir_clear (	/* Returns FR_OK or FR_DISK_ERR */
 #endif
 	{
 		ibuf = fs->win; szb = 1;	/* Use window buffer (many single-sector writes may take a time) */
-		for (n = 0; n < fs->csize && disk_write(fs->pdrv, (BYTE *)(0xA0001000), sect + n, szb) == RES_OK; n += szb) ;	/* Fill the cluster with 0 */
+		for (n = 0; n < fs->csize && disk_write1(fs->pdrv, (BYTE *)(0xA0001000), sect + n, szb) == RES_OK; n += szb) ;	/* Fill the cluster with 0 *///9.3
 		memcpy((BYTE *)(0xA0001000),ibuf,SECTORSIZE*szb);
 	}
 	return (n == fs->csize) ? FR_OK : FR_DISK_ERR;
@@ -3942,7 +3943,8 @@ FRESULT f_open (
 					} else {
 						fp->sect = sc + (DWORD)(ofs / SS(fs));
 #if !FF_FS_TINY
-						if (disk_read(fs->pdrv, (BYTE *)(0xA0001000), fp->sect, 1) != RES_OK) res = FR_DISK_ERR;
+//						if (disk_read(fs->pdrv, (BYTE *)(0xA0001000), fp->sect, 1) != RES_OK) res = FR_DISK_ERR;//9.3
+						if (disk_read2(fs->pdrv, (BYTE *)(0xA0001000), fp->sect, 1) != RES_OK) res = FR_DISK_ERR;
 						memcpy(fp->buf,(BYTE *)(0xA0001000),SECTORSIZE*1);
 #endif
 					}
@@ -4339,7 +4341,7 @@ FRESULT f_write1 (
 #else
 			if (fp->flag & FA_DIRTY) {		/* Write-back sector cache */
 				memcpy((BYTE *)(0xA0001000),fp->buf,SECTORSIZE*1);
-				if (disk_write(fs->pdrv, (BYTE *)(0xA0001000), fp->sect, 1) != RES_OK) ABORT(fs, FR_DISK_ERR);
+				if (disk_write1(fs->pdrv, (BYTE *)(0xA0001000), fp->sect, 1) != RES_OK) ABORT(fs, FR_DISK_ERR);//9.3
 				fp->flag &= (BYTE)~FA_DIRTY;
 			}
 #endif
@@ -4550,7 +4552,7 @@ FRESULT f_sync (
 #if !FF_FS_TINY
 			if (fp->flag & FA_DIRTY) {	/* Write-back cached data if needed */
 				memcpy((BYTE *)(0xA0001000),fp->buf,SECTORSIZE*1);
-				if (disk_write(fs->pdrv, (BYTE *)(0xA0001000), fp->sect, 1) != RES_OK) LEAVE_FF(fs, FR_DISK_ERR);
+				if (disk_write1(fs->pdrv, (BYTE *)(0xA0001000), fp->sect, 1) != RES_OK) LEAVE_FF(fs, FR_DISK_ERR);//9.3
 				fp->flag &= (BYTE)~FA_DIRTY;
 			}
 #endif
@@ -6213,8 +6215,8 @@ static FRESULT create_partition (
 			}
 			if ((pi + 1) * SZ_GPTE % ss == 0) {		/* Write the buffer if it is filled up */
 				for (i = 0; i < ss; bcc = crc32(bcc, buf[i++])) ;	/* Calculate table check sum */
-				if (disk_write(drv, buf, 2 + pi * SZ_GPTE / ss, 1) != RES_OK) return FR_DISK_ERR;		/* Write to primary table */
-				if (disk_write(drv, buf, top_bpt + pi * SZ_GPTE / ss, 1) != RES_OK) return FR_DISK_ERR;	/* Write to secondary table */
+				if (disk_write1(drv, buf, 2 + pi * SZ_GPTE / ss, 1) != RES_OK) return FR_DISK_ERR;		/* Write to primary table *///9.3
+				if (disk_write1(drv, buf, top_bpt + pi * SZ_GPTE / ss, 1) != RES_OK) return FR_DISK_ERR;	/* Write to secondary table *///9.3
 			}
 		} while (++pi < GPT_ITEMS);
 
@@ -6247,7 +6249,7 @@ static FRESULT create_partition (
 		memset(buf, 0, ss);
 		memcpy(buf + MBR_Table, gpt_mbr, 16);		/* Create a GPT partition */
 		st_word(buf + BS_55AA, 0xAA55);
-		if (disk_write(drv, buf, 0, 1) != RES_OK) return FR_DISK_ERR;
+		if (disk_write1(drv, buf, 0, 1) != RES_OK) return FR_DISK_ERR;//9.3
 
 	} else
 #endif
@@ -6288,7 +6290,7 @@ static FRESULT create_partition (
 
 		st_word(buf + BS_55AA, 0xAA55);		/* MBR signature */
 		memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
-		if (disk_write(drv, (BYTE *)(0xA0001000), 0, 1) != RES_OK) return FR_DISK_ERR;	/* Write it to the MBR */
+		if (disk_write1(drv, (BYTE *)(0xA0001000), 0, 1) != RES_OK) return FR_DISK_ERR;	/* Write it to the MBR *///9.3
 		memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 	}
 
@@ -6369,7 +6371,8 @@ FRESULT f_mkfs (
 	b_vol = sz_vol = 0;
 	if (FF_MULTI_PARTITION && ipart != 0) {	/* Is the volume associated with any specific partition? */
 		/* Get partition location from the existing partition table */
-		if (disk_read(pdrv,(BYTE *)(0xA0001000), 0, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	/* Load MBR */
+//		if (disk_read(pdrv,(BYTE *)(0xA0001000), 0, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	/* Load MBR */
+		if (disk_read2(pdrv,(BYTE *)(0xA0001000), 0, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	/* Load MBR *///9.3
 		memcpy(buf,0xA0001000,SECTORSIZE*1);
 		memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 
@@ -6380,7 +6383,7 @@ FRESULT f_mkfs (
 			QWORD pt_lba;
 			xil_printf("wfeng: fun = %s, line = %d\n", __func__, __LINE__);
 			/* Get the partition location from GPT */
-			if (disk_read(pdrv, (BYTE *)(0xA0001000), 1, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	/* Load GPT header sector (next to MBR) */
+			if (disk_read2(pdrv, (BYTE *)(0xA0001000), 1, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3	/* Load GPT header sector (next to MBR) */
 			xil_printf("wfeng: fun = %s, line = %d\n", __func__, __LINE__);
 			memcpy(buf,0xA0001000,SECTORSIZE*1);
 			if (!test_gpt_header(buf)) LEAVE_MKFS(FR_MKFS_ABORTED);	/* Check if GPT header is valid */
@@ -6388,7 +6391,7 @@ FRESULT f_mkfs (
 			pt_lba = ld_qword(buf + GPTH_PtOfs);	/* Table start sector */
 			ofs = i = 0;
 			while (n_ent) {		/* Find MS Basic partition with order of ipart */
-				if (ofs == 0 && disk_read(pdrv, buf, pt_lba++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	/* Get PT sector */
+				if (ofs == 0 && disk_read2(pdrv, buf, pt_lba++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3	/* Get PT sector */
 //				memcpy(buf,0x80000000,SECTORSIZE*1);
 				if (!memcmp(buf + ofs + GPTE_PtGuid, GUID_MS_Basic, 16) && ++i == ipart) {	/* MS basic data partition? */
 					b_vol = ld_qword(buf + ofs + GPTE_FstLba);
@@ -6510,7 +6513,8 @@ FRESULT f_mkfs (
 				n = (i + ss - 1) / ss;
 				memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*n);
 //				Xil_L1DCacheFlush(); //8.20 add
-				if (disk_write(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);// 11.16 LYH 闂傚倸鍊搁崐鎼佸磹閻戣姤鍤勯柛鎾叉閻掑﹪鏌曟繛鐐珔缂佺媭鍨堕弻锝夊箣閿濆憛鎾绘煟閹惧崬鍔﹂柡宀嬬秮瀵挳鎮欑拠褎瀚归柛锔诲弿閹峰嘲顫濋悙顒�顏�
+//				if (disk_write(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+				if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR); //9.3
 				xil_printf("%s %d\r\n", __FUNCTION__, __LINE__);
 				memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 				sect += n; i = 0;
@@ -6528,7 +6532,7 @@ FRESULT f_mkfs (
 			n = (nsect > sz_buf) ? sz_buf : nsect;		/* Write the buffered data */
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*n);
 //			Xil_L1DCacheFlush(); //8.20 add
-			if (disk_write(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+			if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR); //9.3
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*n);
 			sect += n; nsect -= n;
 		} while (nsect);
@@ -6552,7 +6556,7 @@ FRESULT f_mkfs (
 			n = (nsect > sz_buf) ? sz_buf : nsect;	/* Write the buffered data */
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*n);
 //			Xil_L1DCacheFlush(); //8.20 add
-			if (disk_write(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+			if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3
 			sect += n; nsect -= n;
 		} while (nsect);
 		xil_printf("%s %d\r\n", __FUNCTION__, __LINE__);
@@ -6571,7 +6575,7 @@ FRESULT f_mkfs (
 			n = (nsect > sz_buf) ? sz_buf : nsect;
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*n);
 //			Xil_L1DCacheFlush(); //8.20 add
-			if (disk_write(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+			if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect, n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*n);
 			memset(buf, 0, ss);	/* Rest of entries are filled with zero */
 			sect += n; nsect -= n;
@@ -6604,7 +6608,7 @@ FRESULT f_mkfs (
 			xil_printf("%s %d\r\n", __FUNCTION__, __LINE__);
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
 //			Xil_L1DCacheFlush(); //8.20 add
-			if (disk_write(pdrv, (BYTE *)(0xA0001000), sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+			if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 			/* Extended bootstrap record (+1..+8) */
 			memset(buf, 0, ss);
@@ -6613,7 +6617,7 @@ FRESULT f_mkfs (
 				for (i = 0; i < ss; sum = xsum32(buf[i++], sum)) ;	/* VBR checksum */
 				memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
 //				Xil_L1DCacheFlush(); //8.20 add
-				if (disk_write(pdrv, (BYTE *)(0xA0001000), sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+				if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3
 				memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 			}
 			xil_printf("%s %d\r\n", __FUNCTION__, __LINE__);
@@ -6623,12 +6627,12 @@ FRESULT f_mkfs (
 				for (i = 0; i < ss; sum = xsum32(buf[i++], sum)) ;	/* VBR checksum */
 				memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
 //				Xil_L1DCacheFlush(); //8.20 add
-				if (disk_write(pdrv, (BYTE *)(0xA0001000), sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+				if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3
 			}
 			/* Sum record (+11) */
 			for (i = 0; i < ss; i += 4) st_dword(buf + i, sum);		/* Fill with checksum value */
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
-			if (disk_write(pdrv, (BYTE *)(0xA0001000), sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+			if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect++, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 		}
 
@@ -6750,13 +6754,13 @@ FRESULT f_mkfs (
 		st_word(buf + BS_55AA, 0xAA55);					/* Signature (offset is fixed here regardless of sector size) */
 		memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
 //		Xil_L1DCacheFlush(); //8.20 add
-		if (disk_write(pdrv, (BYTE *)(0xA0001000), b_vol, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	/* Write it to the VBR sector */
+		if (disk_write1(pdrv, (BYTE *)(0xA0001000), b_vol, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3	/* Write it to the VBR sector */
 		memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 
 		/* Create FSINFO record if needed */
 		if (fsty == FS_FAT32) {
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
-			disk_write(pdrv, (BYTE *)(0xA0001000), b_vol + 6, 1);		/* Write backup VBR (VBR + 6) */
+			disk_write1(pdrv, (BYTE *)(0xA0001000), b_vol + 6, 1);	//9.3	/* Write backup VBR (VBR + 6) */
 			memset(buf, 0, ss);
 			st_dword(buf + FSI_LeadSig, 0x41615252);
 			st_dword(buf + FSI_StrucSig, 0x61417272);
@@ -6765,12 +6769,12 @@ FRESULT f_mkfs (
 			st_word(buf + BS_55AA, 0xAA55);
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
 //			Xil_L1DCacheFlush(); //8.20 add
-			disk_write(pdrv, (BYTE *)(0xA0001000), b_vol + 7, 1);		/* Write backup FSINFO (VBR + 7) */
+			disk_write1(pdrv, (BYTE *)(0xA0001000), b_vol + 7, 1);		//9.3/* Write backup FSINFO (VBR + 7) */
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 			
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
 //			Xil_L1DCacheFlush(); //8.20 add
-			disk_write(pdrv, (BYTE *)(0xA0001000), b_vol + 1, 1);		/* Write original FSINFO (VBR + 1) */
+			disk_write1(pdrv, (BYTE *)(0xA0001000), b_vol + 1, 1);		//9.3/* Write original FSINFO (VBR + 1) */
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 		}
 
@@ -6790,7 +6794,7 @@ FRESULT f_mkfs (
 				n = (nsect > sz_buf) ? sz_buf : nsect;
 				memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*n);
 //				Xil_L1DCacheFlush(); //8.20 add
-				if (disk_write(pdrv, (BYTE *)(0xA0001000), sect, (UINT)n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+				if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect, (UINT)n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3
 				memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 				memset(buf, 0, ss);	/* Rest of FAT all are cleared */
 				sect += n; nsect -= n;
@@ -6803,7 +6807,7 @@ FRESULT f_mkfs (
 			n = (nsect > sz_buf) ? sz_buf : nsect;
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*n);
 //			Xil_L1DCacheFlush(); //8.20 add
-			if (disk_write(pdrv, (BYTE *)(0xA0001000), sect, (UINT)n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);
+			if (disk_write1(pdrv, (BYTE *)(0xA0001000), sect, (UINT)n) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*n);
 			sect += n; nsect -= n;
 		} while (nsect);
@@ -6829,14 +6833,14 @@ FRESULT f_mkfs (
 		if (!FF_LBA64 || !(fsopt & 0x80)) {	/* Is the partition in MBR? */
 			/* Update system ID in the partition table */
 
-			if (disk_read(pdrv, (BYTE *)(0xA0001000), 0, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	/* Read the MBR */
+			if (disk_read2(pdrv, (BYTE *)(0xA0001000), 0, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	//9.3/* Read the MBR */
 //			Xil_L1DCacheFlush(); //8.20 add
 			memcpy(buf,0xA0001000,SECTORSIZE*1);
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 			buf[MBR_Table + (ipart - 1) * SZ_PTE + PTE_System] = sys;			/* Set system ID */
 			memcpy((BYTE *)(0xA0001000),buf,SECTORSIZE*1);
 //			Xil_L1DCacheFlush(); //8.20 add
-			if (disk_write(pdrv, (BYTE *)(0xA0001000), 0, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);	/* Write it back to the MBR */
+			if (disk_write1(pdrv, (BYTE *)(0xA0001000), 0, 1) != RES_OK) LEAVE_MKFS(FR_DISK_ERR);//9.3	/* Write it back to the MBR */
 			memset((BYTE *)(0xA0001000),0,SECTORSIZE*1);
 		}
 	} else {								/* Volume as a new single partition */
