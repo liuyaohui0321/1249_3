@@ -112,7 +112,7 @@ int main()
 		xil_printf(" Init All ok!\r\n");
 #endif
 //		run_cmd_d205('D',2);
-//		run_cmd_d205_8x();
+		run_cmd_d205_8x();
 //		Xil_ICacheEnable();
 //		Xil_DCacheEnable();
 //		uint32_t  buf = (void *)(0x80000000);
