@@ -2753,6 +2753,7 @@ int run_cmd_d203(StructMsg *pMsg)
 //					}
 //					break;
 //				}
+//				FLAG=1;
 				ret = f_write1(
 					&wfile,			/* Open file to be written */
 					buff,			/* Data to be written */

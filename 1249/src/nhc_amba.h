@@ -11,7 +11,7 @@
 #define  DDR_BLK_NUM       (1024*1024*1024)/U_BLK_SIZE
 
 #define  LEN_4             954368
-
+extern uint8_t FLAG;
 // NVMe Host IP Base Address
 
 

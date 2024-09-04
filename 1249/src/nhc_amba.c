@@ -838,107 +838,15 @@ uint8_t io_flush(uint8_t nhc_num,uint32_t nsid)
 	return sts;
 }
 
+uint32_t RoundDown32(uint32_t number)
+{
+    return number & ~31;
+}
+
 // *********************************************************************************
 // I/O Write
 // <-0x0: not submitted; 0x1: Ongoing; 0x2: Successful; 0x3: Error
 // *********************************************************************************
-uint8_t io_write(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm)
-{
-
-	uint32_t cmd_cdw[16];
-	uint8_t  sts;
-	uint8_t  i,j;
-	static uint32_t full_wr_cnt = 0;
-	slba = 2*slba/512/nhc_num;
-//	xil_printf("io_write addr=0x%x slba=%u  ", addr, slba);
-//	xil_printf("len=%lu\n", len);
-	for(i=0;i<nhc_num;i++)
-	{
-		// Command Submission
-		cmd_cdw[0]  = 0x80350081;
-		cmd_cdw[1]  = nsid;
-		cmd_cdw[2]  = 0x0;
-		cmd_cdw[3]  = 0x0;
-		cmd_cdw[4]  = 0x0;
-		cmd_cdw[5]  = 0x0;
-//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*U_BLK_SIZE/nhc_num;   // 9.27改
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;
-//		cmd_cdw[6]  = addr + i*len/nhc_num;
-		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
-		cmd_cdw[8]  = 0x0;
-		cmd_cdw[9]  = 0x0;
-		cmd_cdw[10] = (uint32_t) (slba >> 0);
-		cmd_cdw[11] = (uint32_t) (slba >> 32);
-		cmd_cdw[12] = len/512/nhc_num*2;
-//		cmd_cdw[12] = len/512/nhc_num*2*2;
-//		cmd_cdw[12] = len/512/nhc_num*2;
-	//			cmd_cdw[12] = 64;
-		cmd_cdw[13] = dsm & 0xFF;
-		cmd_cdw[14] = 0x0;
-		cmd_cdw[15] = 0x0;
-
-		sts = nhc_cmd_sub(i,cmd_cdw);////Previously, sub was behind while
-
-//		while (nhc_queue_full(i) == 0x1)
-//		{
-			//wait command ack.
-			for(j=0;j<nhc_num;j++)
-			{
-				do {
-					sts = nhc_cmd_sts(j);
-				}while(sts == 0x01);
-			}
-			//send ack.
-			//send_axis_ack(0x01,0x0,sts);
-//		}
-
-	}
-	if (addr == DDR4_START_ADDR)
-	{
-	 	full_wr_cnt = full_wr_cnt + 1;
-//		xil_printf("Have write full ddr area.full write cnt is %d.\n",full_wr_cnt);
-	}
-	// Command Status
-		while (queue_rptr != queue_wptr)
-		{
-			sts = nhc_cmd_sts(0);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue2_rptr != queue2_wptr)
-		{
-			sts = nhc_cmd_sts(1);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue3_rptr != queue3_wptr)
-		{
-			sts = nhc_cmd_sts(2);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue4_rptr != queue4_wptr)
-		{
-			sts = nhc_cmd_sts(3);
-			if (sts == 3)
-				return sts;
-		}
-//		while (queue5_rptr != queue5_wptr)
-//		{
-//			sts = nhc_cmd_sts(4);
-//			if (sts == 3)
-//				return sts;
-//		}
-//		while (queue6_rptr != queue6_wptr)
-//		{
-//			sts = nhc_cmd_sts(5);
-//			if (sts == 3)
-//				return sts;
-//		}
-	return 0x02;
-}
-
-
 uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm)
 {
 
@@ -952,10 +860,11 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 //	slba = slba/512/nhc_num*2; //6.13改
 //	slba = slba/512/nhc_num;
 //	slba = 2*slba/512/8;
-	slba = slba/512/6;
 	slba_1= (slba/512)%6;
+	slba = slba/512/4;
 	LEN=len/512/6;
-	LEN_1=(len/512)%6;
+	LEN=RoundDown32(LEN);
+	LEN_1=len/2/512-LEN*2;
 
 	for(i=0;i<nhc_num;)
 	{
@@ -967,14 +876,24 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 		cmd_cdw[4]  = 0x0;
 		cmd_cdw[5]  = 0x0;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;   //6.13改
-//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/6;
+		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*LEN*512;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
-		cmd_cdw[6]  = convertToMultipleOfSix(addr + (i%(nhc_num/DDR_NUM))*len/6);
+//		cmd_cdw[6]  = convertToMultipleOfSix(addr + (i%(nhc_num/DDR_NUM))*len/6);
 		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
 		cmd_cdw[8]  = 0x0;
 		cmd_cdw[9]  = 0x0;
-		cmd_cdw[10] = (uint32_t) (slba >> 0);
-		cmd_cdw[11] = (uint32_t) (slba >> 32);
+//		if((i%3==2)&&(FLAG==1))
+//		{
+//			cmd_cdw[10] = (uint32_t) ((slba+40) >> 0);
+//			cmd_cdw[11] = (uint32_t) ((slba+40) >> 32);
+//		}
+//		else
+//		{
+//			cmd_cdw[10] = (uint32_t) ((slba+1) >> 0);
+//			cmd_cdw[11] = (uint32_t) ((slba+1) >> 32);
+//		}
+		cmd_cdw[10] = (uint32_t) (slba>> 0);
+		cmd_cdw[11] = (uint32_t) (slba>> 32);
 //		cmd_cdw[12] = len/512/nhc_num*2;
 //		cmd_cdw[12] = len/512/nhc_num;
 //		if(i%3==2)
@@ -982,9 +901,9 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 //		else
 //			cmd_cdw[12]  = len/512/8;
 		if(i%3==2)
-			cmd_cdw[12]  = convertToMultipleOfSix(LEN+LEN_1);
+			cmd_cdw[12]  = LEN_1;
 		else
-			cmd_cdw[12]  = convertToMultipleOfSix(LEN);
+			cmd_cdw[12]  = LEN;
 		cmd_cdw[13] = dsm & 0xFF;
 		cmd_cdw[14] = 0x0;
 		cmd_cdw[15] = 0x0;
@@ -1042,6 +961,7 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 			if (sts == 3)
 				return sts;
 		}
+	FLAG=0;
 	return 0x02;
 }
 
@@ -1137,229 +1057,7 @@ uint8_t io_write3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 		}
 		return 0x02;
 }
-// *********************************************************************************
-// I/O Read
-// <-0x0: not submitted; 0x1: Ongoing; 0x2: Successful; 0x3: Error
-// *********************************************************************************
-uint8_t io_read(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm)
-{
-	uint32_t cmd_cdw[16];
-	uint8_t  sts;
-	uint8_t  i,j;
-	u32 read_dataaddr;
-	static uint32_t full_rd_cnt = 0;
 
-	slba = 2*slba/512/nhc_num;
-//	slba = slba/512;
-	for(i=0;i<nhc_num;i++)
-	{
-//		if (i == 0)
-//			continue;
-		// Command Submission
-		cmd_cdw[0]  = 0x80350082;
-		cmd_cdw[1]  = nsid;
-		cmd_cdw[2]  = 0x0;
-		cmd_cdw[3]  = 0x0;
-		cmd_cdw[4]  = 0x0;
-		cmd_cdw[5]  = 0x0;
-//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*U_BLK_SIZE/nhc_num;   // 9.27改
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;
-//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len;
-		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
-		cmd_cdw[8]  = 0x0;
-		cmd_cdw[9]  = 0x0;
-		cmd_cdw[10] = (uint32_t) (slba >> 0);
-		cmd_cdw[11] = (uint32_t) (slba >> 32);
-//		cmd_cdw[12] = len/512/nhc_num;
-//		cmd_cdw[12] = len/512/nhc_num*2*2;   // 9.25
-		cmd_cdw[12] = len/512/nhc_num*2;
-//		cmd_cdw[12] = U_BLK_SIZE/512/nhc_num;
-		cmd_cdw[13] = dsm & 0xFF;
-		cmd_cdw[14] = 0x0;
-		cmd_cdw[15] = 0x0;
-
-//		while (nhc_queue_full(i) == 0x1)
-//		{
-//
-//
-//		}
-		sts = nhc_cmd_sub(i,cmd_cdw);
-	}
-	//wait command ack.
-	for(j=0;j<nhc_num;j++)
-	{
-		do {
-			sts = nhc_cmd_sts(j);
-		}while(sts == 0x01);
-	}
-//	usleep(5000);
-//	read_dataaddr = Xil_In32(addr);
-//	 xil_printf("  address: 0x%08x, data: 0x%08x \r\n",addr, read_dataaddr);
-	//xil_printf("sleep 1s before\n");
-
-//		xil_printf("sleep 1s after.....\n");
-	//send ack.
-//    send_axis_ack_1(0x02,addr,len/8192,sts);
-
-	//send_axis_ack_1(0x02,addr,len/2,sts);
-	//send_axis_ack_1(0x02,0x0,sts);
-//	xil_printf("send_axis_ack is ok\n");
-	if (addr == DDR4_START_ADDR)
-	{
-		full_rd_cnt = full_rd_cnt + 1;
-		xil_printf("Have read full ddr area.full read cnt is %d.\n",full_rd_cnt);
-	}
-	// Command Status
-		while (queue_rptr != queue_wptr)
-		{
-			sts = nhc_cmd_sts(0);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue2_rptr != queue2_wptr)
-		{
-			sts = nhc_cmd_sts(1);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue3_rptr != queue3_wptr)
-		{
-			sts = nhc_cmd_sts(2);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue4_rptr != queue4_wptr)
-		{
-			sts = nhc_cmd_sts(3);
-			if (sts == 3)
-				return sts;
-		}
-//		while (queue5_rptr != queue5_wptr)
-//		{
-//			sts = nhc_cmd_sts(4);
-//			if (sts == 3)
-//				return sts;
-//		}
-//		while (queue6_rptr != queue6_wptr)
-//		{
-//			sts = nhc_cmd_sts(5);
-//			if (sts == 3)
-//				return sts;
-//		}
-	return 0x02;
-}
-
-// *********************************************************************************
-// I/O Read1   FIFO
-// <-0x0: not submitted; 0x1: Ongoing; 0x2: Successful; 0x3: Error
-// *********************************************************************************
-uint8_t io_read1(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm)
-{
-	uint32_t cmd_cdw[16];
-	uint8_t  sts;
-	uint8_t  i,j;
-	u32 read_dataaddr;
-	static uint32_t full_rd_cnt = 0;
-	u32 Timeout=0;
-	slba = slba/512/nhc_num;
-//	Xil_L1DCacheFlush();
-	for(i=0;i<nhc_num;i++)
-	{
-//		if (i == 0)
-//			continue;
-		// Command Submission
-		cmd_cdw[0]  = 0x80350082;
-		cmd_cdw[1]  = nsid;
-		cmd_cdw[2]  = 0x0;
-		cmd_cdw[3]  = 0x0;
-		cmd_cdw[4]  = 0x0;
-		cmd_cdw[5]  = 0x0;
-//		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*U_BLK_SIZE/nhc_num;   // 9.27改
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
-		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
-		cmd_cdw[8]  = 0x0;
-		cmd_cdw[9]  = 0x0;
-		cmd_cdw[10] = (uint32_t) (slba >> 0);
-		cmd_cdw[11] = (uint32_t) (slba >> 32);
-		cmd_cdw[12] = len/512/nhc_num;
-//		cmd_cdw[12] = len/512/nhc_num*2*2;   // 9.25
-//		cmd_cdw[12] = len/512/nhc_num*2;
-//		cmd_cdw[12] = U_BLK_SIZE/512/nhc_num;
-		cmd_cdw[13] = dsm & 0xFF;
-		cmd_cdw[14] = 0x0;
-		cmd_cdw[15] = 0x0;
-
-//		while (nhc_queue_full(i) == 0x1)
-//		{
-//
-//
-//		}
-		sts = nhc_cmd_sub(i,cmd_cdw);
-	}
-	//wait command ack.
-	for(j=0;j<nhc_num;j++)
-	{
-		do {
-			Timeout++;
-			sts = nhc_cmd_sts(j);
-		}while(sts == 0x01&&Timeout<=0x100000);
-	}
-//	usleep(5000);
-//	read_dataaddr = Xil_In32(addr);
-//	 xil_printf("  address: 0x%08x, data: 0x%08x \r\n",addr, read_dataaddr);
-	//xil_printf("sleep 1s before\n");
-
-//		xil_printf("sleep 1s after.....\n");
-	//send ack.
-    send_axis_ack_1(0x02,addr,len/8192,sts);
-
-	//send_axis_ack_1(0x02,addr,len/2,sts);
-	//send_axis_ack_1(0x02,0x0,sts);
-//	xil_printf("send_axis_ack is ok\n");
-	if (addr == DDR4_START_ADDR)
-	{
-		full_rd_cnt = full_rd_cnt + 1;
-		xil_printf("Have read full ddr area.full read cnt is %d.\n",full_rd_cnt);
-	}
-	// Command Status
-		while (queue_rptr != queue_wptr)
-		{
-			sts = nhc_cmd_sts(0);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue2_rptr != queue2_wptr)
-		{
-			sts = nhc_cmd_sts(1);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue3_rptr != queue3_wptr)
-		{
-			sts = nhc_cmd_sts(2);
-			if (sts == 3)
-				return sts;
-		}
-		while (queue4_rptr != queue4_wptr)
-		{
-			sts = nhc_cmd_sts(3);
-			if (sts == 3)
-				return sts;
-		}
-//		while (queue5_rptr != queue5_wptr)
-//		{
-//			sts = nhc_cmd_sts(4);
-//			if (sts == 3)
-//				return sts;
-//		}
-//		while (queue6_rptr != queue6_wptr)
-//		{
-//			sts = nhc_cmd_sts(5);
-//			if (sts == 3)
-//				return sts;
-//		}
-	return 0x02;
-}
 
 
 //io_write2
@@ -1370,16 +1068,17 @@ uint8_t io_read2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 	uint8_t  i,j;
 	static uint32_t full_rd_cnt = 0;
 
-//	slba = slba/512/nhc_num*2;
-//	slba = slba/512/nhc_num;
 	uint64_t slba_1=0;
 	uint32_t LEN=0;
 	uint32_t LEN_1=0;
-	slba = slba/512/6;
-	slba_1= (slba/512)%6;
-	LEN=len/512/6;
-	LEN_1=(len/512)%6;
+//	slba = slba/512/nhc_num*2; //6.13改
+//	slba = slba/512/nhc_num;
 //	slba = 2*slba/512/8;
+	slba_1= (slba/512)%6;
+	slba = slba/512/6;
+	LEN=len/512/6;
+	LEN=RoundDown32(LEN);
+	LEN_1=len/2/512-LEN*2;
 	for(i=0;i<nhc_num;)
 	{
 //		if (i == 0)
@@ -1393,7 +1092,7 @@ uint8_t io_read2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 		cmd_cdw[5]  = 0x0;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/6;
+		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*LEN*512;
 		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
 		cmd_cdw[8]  = 0x0;
 		cmd_cdw[9]  = 0x0;
@@ -1403,7 +1102,7 @@ uint8_t io_read2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 //		cmd_cdw[12] = len/512/nhc_num;
 		if(i%3==2)
 //			cmd_cdw[12]  = len/512/4;
-			cmd_cdw[12]  = LEN+LEN_1;
+			cmd_cdw[12]  = LEN_1;
 		else
 //			cmd_cdw[12]  = len/512/8;
 			cmd_cdw[12]  = LEN;
@@ -1476,11 +1175,14 @@ uint8_t io_read3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 	uint64_t slba_1=0;
 	uint32_t LEN=0;
 	uint32_t LEN_1=0;
-	slba = slba/512/6;
-	slba_1= (slba/512)%6;
-	LEN=len/512/6;
-	LEN_1=(len/512)%6;
+//	slba = slba/512/nhc_num*2; //6.13改
+//	slba = slba/512/nhc_num;
 //	slba = 2*slba/512/8;
+	slba_1= (slba/512)%6;
+	slba = slba/512/4;
+	LEN=len/512/6;
+	LEN=RoundDown32(LEN);
+	LEN_1=len/2/512-LEN*2;
 	for(i=0;i<nhc_num;)
 	{
 		cmd_cdw[0]  = 0x80350082;
@@ -1491,7 +1193,7 @@ uint8_t io_read3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 		cmd_cdw[5]  = 0x0;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len*2/nhc_num;
 //		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/nhc_num;
-		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*len/6;
+		cmd_cdw[6]  = addr + (i%(nhc_num/DDR_NUM))*LEN*512;
 		cmd_cdw[7]  = 0x0; // Non-zero if use 64bit memory address
 		cmd_cdw[8]  = 0x0;
 		cmd_cdw[9]  = 0x0;
@@ -1501,7 +1203,7 @@ uint8_t io_read3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 //		cmd_cdw[12] = len/512/nhc_num;
 		if(i%3==2)
 //			cmd_cdw[12]  = len/512/4;
-			cmd_cdw[12]  = LEN+LEN_1;
+			cmd_cdw[12]  = LEN_1;
 		else
 //			cmd_cdw[12]  = len/512/8;
 			cmd_cdw[12]  = LEN;
@@ -1662,6 +1364,8 @@ uint32_t convertToMultipleOfSix(uint32_t num)
     }
     return num;
 }
+
+
 // *********************************************************************************
 // I/O Dataset Management
 // <-0x0: not submitted; 0x1: Ongoing; 0x2: Successful; 0x3: Error
