@@ -858,9 +858,18 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 	uint32_t LEN=0;
 	uint32_t LEN_1=0;
 	slba = slba/512/4;
-//	LEN=len/512/6;
-	LEN=RoundDown32(len/512/6);
-	LEN_1=len/2/512-LEN*2;
+	if(len==0x10000000)
+	{
+  //	LEN=len/512/6;
+		LEN=RoundDown32(len/512/6);
+		LEN_1=len/2/512-LEN*2;
+	}
+	else
+	{
+		LEN=len/512/6;
+		LEN_1=len/2/512-LEN*2;
+	}
+
 
 	for(i=0;i<nhc_num;)
 	{
@@ -933,7 +942,6 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 			if (sts == 3)
 				return sts;
 		}
-	FLAG=0;
 	return 0x02;
 }
 
@@ -1040,17 +1048,25 @@ uint8_t io_read2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 	uint8_t  i,j;
 	static uint32_t full_rd_cnt = 0;
 
-	uint64_t slba_1=0;
+//	uint64_t slba_1=0;
 	uint32_t LEN=0;
 	uint32_t LEN_1=0;
 //	slba = slba/512/nhc_num*2; //6.13¸Ä
 //	slba = slba/512/nhc_num;
 //	slba = 2*slba/512/8;
-	slba_1= (slba/512)%6;
-	slba = slba/512/6;
-	LEN=len/512/6;
-	LEN=RoundDown32(LEN);
-	LEN_1=len/2/512-LEN*2;
+//	slba_1= (slba/512)%6;
+	slba = slba/512/4;
+	if(len==0x10000000)
+	{
+  //	LEN=len/512/6;
+		LEN=RoundDown32(len/512/6);
+		LEN_1=len/2/512-LEN*2;
+	}
+	else
+	{
+		LEN=len/512/6;
+		LEN_1=len/2/512-LEN*2;
+	}
 	for(i=0;i<nhc_num;)
 	{
 //		if (i == 0)
@@ -1143,9 +1159,18 @@ uint8_t io_read3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 	uint32_t LEN=0;
 	uint32_t LEN_1=0;
 	slba = slba/512/4;
-//	LEN=len/512/6;
-	LEN=RoundDown32(len/512/6);
-	LEN_1=len/2/512-LEN*2;
+	if(len==0x10000000)
+	{
+  //	LEN=len/512/6;
+		LEN=RoundDown32(len/512/6);
+		LEN_1=len/2/512-LEN*2;
+	}
+	else
+	{
+		LEN=len/512/6;
+		LEN_1=len/2/512-LEN*2;
+	}
+
 	for(i=0;i<nhc_num;)
 	{
 		cmd_cdw[0]  = 0x80350082;
