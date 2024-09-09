@@ -13,7 +13,7 @@
 #include "FIFO.h"
 
 
-#define 	OFFSET_SIZE             128*1024*1024   // 32M
+#define 	OFFSET_SIZE             512*1024*1024   // 32M
 //#define 	MAX_LEN             0x2000 0x27EC 0x5B4
 #define 	MAX_LEN             0x400
 //接收模式   6.17

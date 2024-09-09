@@ -858,7 +858,7 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 	uint32_t LEN=0;
 	uint32_t LEN_1=0;
 	slba = slba/512/4;
-	if(len==0x10000000)
+	if(len>=0x1000000)
 	{
   //	LEN=len/512/6;
 		LEN=RoundDown32(len/512/6);
@@ -870,7 +870,7 @@ uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, 
 		LEN_1=len/2/512-LEN*2;
 	}
 
-
+//	xil_printf("IOWrite slba:%llx!\r\n",slba);
 	for(i=0;i<nhc_num;)
 	{
 		// Command Submission
@@ -1056,7 +1056,7 @@ uint8_t io_read2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 //	slba = 2*slba/512/8;
 //	slba_1= (slba/512)%6;
 	slba = slba/512/4;
-	if(len==0x10000000)
+	if(len>=0x1000000)
 	{
   //	LEN=len/512/6;
 		LEN=RoundDown32(len/512/6);
@@ -1159,7 +1159,7 @@ uint8_t io_read3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 	uint32_t LEN=0;
 	uint32_t LEN_1=0;
 	slba = slba/512/4;
-	if(len==0x10000000)
+	if(len>=0x1000000)
 	{
   //	LEN=len/512/6;
 		LEN=RoundDown32(len/512/6);
@@ -1170,7 +1170,7 @@ uint8_t io_read3(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, u
 		LEN=len/512/6;
 		LEN_1=len/2/512-LEN*2;
 	}
-
+//	xil_printf("IORead slba:%llx!\r\n",slba);
 	for(i=0;i<nhc_num;)
 	{
 		cmd_cdw[0]  = 0x80350082;

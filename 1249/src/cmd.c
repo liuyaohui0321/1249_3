@@ -2665,7 +2665,7 @@ int run_cmd_d203(StructMsg *pMsg)
 #if   10	//覆盖写入
 		// 获取并解析从DMA0传过来的文件路径
 //		ret = f_open(&wfile,cmd_str_11, FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
-		ret = f_open(&wfile,"D", FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
+		ret = f_open(&wfile,"G", FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
 		if (ret != FR_OK)
 		{
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
@@ -2737,7 +2737,7 @@ int run_cmd_d203(StructMsg *pMsg)
 					}
 					break;
 				}
-//				if(cmd_write_cnt==101)		// 3.19号改 by lyh
+//				if(cmd_write_cnt==15)
 //				{
 //					xil_printf("Write Finish!\r\n");
 ////					xil_printf("w_count = %u\r\n",cmd_write_cnt);
@@ -2767,7 +2767,7 @@ int run_cmd_d203(StructMsg *pMsg)
 					 return ret;
 				}
 				cmd_write_cnt += 1;
-//				xil_printf("buff:0x%lx \r\n",buff);
+//				xil_printf("write_cnt:%u \r\n",cmd_write_cnt);
 			}
 			else
 			{
@@ -3109,7 +3109,7 @@ int run_cmd_d205_8x(BYTE* name)
 
 	  xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 //	  ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
-	  ret = f_open(&rfile,"D", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
+	  ret = f_open(&rfile,"G", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
 //	  ret = f_open(&rfile,"111", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
 	  if (ret != FR_OK)
 	  {
@@ -3156,16 +3156,31 @@ int run_cmd_d205_8x(BYTE* name)
 					return ret;
 			}
 			r_count++;
-
+//			xil_printf("r_count:%u\r\n", r_count);
+//			if(r_count==15)
+//			{
+//				xil_printf("Write Finish!\r\n");
+//				xil_printf("r_count = %u \r\n",r_count);
+//				for(i=0;i<NHC_NUM;i++)
+//				{
+//					while (nhc_queue_ept(i) == 0)
+//					{
+//						do {
+//							sts = nhc_cmd_sts(i);
+//						}while(sts == 0x01);
+//					}
+//				}
+//				break;
+//			}
 			//sfifo发送长度
 			DestinationBuffer_1[0]=len;
 			DestinationBuffer_1[1]=buff_r;
 //			XLLFIFO_SysInit();
 //			Xil_L1DCacheFlush();
-			if(r_count<3)
-			{
-				usleep(100000);
-			}
+//			if(r_count<3)
+//			{
+//				usleep(100000);
+//			}
 			ret = TxSend(DestinationBuffer_1,8);
 			if (ret != XST_SUCCESS)
 			{
@@ -3173,14 +3188,13 @@ int run_cmd_d205_8x(BYTE* name)
 				 return ret;
 			}
 
-//			if(r_count>2)
-//			if(r_count>20)
-//			{
+			if(r_count>2)
+			{
 				do
 				{
 					RxReceive(DestinationBuffer_1,&cmd_len);
 				}while(!(0xaa55aa55 == DestinationBuffer_1[0]));
-//			}
+			}
 			for(i=0;i<NHC_NUM;i++)
 			{
 					while (nhc_queue_ept(i) == 0)

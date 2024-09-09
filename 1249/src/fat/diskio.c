@@ -99,7 +99,7 @@ DRESULT disk_read2 (
 	uint64_t slba=sector*SECTORSIZE;
 	uint32_t len=count*SECTORSIZE;
 //	if(io_read3(NHC_NUM,0x1, buff,sector*SECTORSIZE, (UINT)(count*SECTORSIZE), 0x0) != 0x2)
-	if(io_read4(NHC_NUM,0x1, buff,slba, (uint32_t)len, 0x0) != 0x2)
+	if(io_read3(NHC_NUM,0x1, buff,slba, (uint32_t)len, 0x0) != 0x2)
 	{
 		xil_printf("I/O Read Failed!\n\n");
 	}
@@ -137,8 +137,7 @@ DRESULT disk_write1 (
 )
 {
 	//sector lba
-//	if(io_write(NHC_NUM,0x1, buff,sector*SECTORSIZE, (uint32_t)(count*SECTORSIZE*2), 0x0) != 0x2)//wfeng
-	if(io_write3(NHC_NUM,0x1, buff,sector*SECTORSIZE, (uint32_t)(count*SECTORSIZE), 0x0) != 0x2)//lyh
+	if(io_write2(NHC_NUM,0x1, buff,sector*SECTORSIZE, (uint32_t)(count*SECTORSIZE), 0x0) != 0x2)//lyh
 	{
 		xil_printf("I/O Write Failed!\n\n");
 	}
