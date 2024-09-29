@@ -22,9 +22,9 @@ extern "C" {
 //#define   SECTORCNT        266250000       // 能分配65003个簇
 //#define   SECTORCNT        268431360       // 能分配65536个簇
 //#define   SECTORCNT        536739840       // 适配4t磁盘,2片DDR的参数
-//#define   SECTORCNT        1610481664		 // 5.21改 适配6t磁盘,1片DDR的参数
+#define   SECTORCNT        	1610350592		 // 适配6t磁盘,1片DDR的参数
 //#define   SECTORCNT        64487424		 // //5.21改 适配现有zu7的硬件环境
-#define     SECTORCNT        1073479680       // 适配4t磁盘,1片DDR的参数
+//#define     SECTORCNT        1073479680       // 适配4t磁盘,1片DDR的参数
 //#define     SECTORCNT          1073741824    // 适配4t磁盘,2片DDR的参数
 
 /* Status of Disk Functions */

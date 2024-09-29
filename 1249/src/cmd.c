@@ -11,7 +11,9 @@
 #include "FIFO.h"
 #include "simple_dma.h"
 #include "xuartLite.h"
+#include "xllfifo.h"
 
+extern XLlFifo Fifo0;
 #define STM32_UART      1
 #define MERGE2(a, b) a ## b
 #define CVTBL(tbl, cp) MERGE2(tbl, cp)
@@ -47,7 +49,9 @@ int result_d201=0x0;
 int result_d205=0x0;
 int result_d20A=0x0;
 int result_f201=0x0;
-int Read_Packet_Size=0x20000000;
+int Read_Packet_Size=0x10000000;
+//int Read_Packet_Size1=0x1000;
+int Read_Packet_Size1=0x10000000;
 //uint8_t HasCreat=0;
 uint8_t Stop_read=0;
 //extern struct message_struct fifodata;
@@ -778,6 +782,7 @@ int run_cmd_a201(StructMsg *pMsg)
 					{
 						return XST_FAILURE;
 					}
+//					xil_printf("ret=%d\r\n", ret);
 				}
 				COUNT++;
 				databuf+=wlen;
@@ -786,7 +791,7 @@ int run_cmd_a201(StructMsg *pMsg)
 					wlen=lastpack_Size;
 				}
 				if(COUNT==upload_time)  break;
-				usleep(1);
+				usleep(100);
 			}
 			xil_printf("%s %d  write_len=%d\r\n", __FUNCTION__, __LINE__,write_len);
 			write_len=0;
@@ -2320,6 +2325,7 @@ int cmd_reply_a208(BYTE* path)
 			Reverse_u16(ReplyStructA208Ack.message[i].name);
 			ReplyStructA208Ack.message[i].type=Reverse_u64(ReplyStructA208Ack.message[i].type);
 			ReplyStructA208Ack.message[i].size=Reverse_u64(ReplyStructA208Ack.message[i].size);
+			if(ReplyStructA208Ack.message[i].type==0x1000000)    ReplyStructA208Ack.message[i].size=0x0;//24.9.28 add by lyh  文件夹的大小不能为0，否则上位机会崩
 //			ReplyStructA208Ack.message[i].type=SW64(ReplyStructA208Ack.message[i].type);
 //			ReplyStructA208Ack.message[i].size=SW64(ReplyStructA208Ack.message[i].size);
 		}
@@ -2526,7 +2532,7 @@ int run_cmd_d202(StructMsg *pMsg)
 		BYTE cmd_str_11[100]={0};
 		uint32_t  cmd_write_cnt=0,cmd_len=0;
 		uint8_t   sts=0;
-		uint32_t  len=0;
+		uint32_t  len=0,Free_Clust=0;
 		uint32_t  count=0;
 		uint32_t  buff = (void *)(MEM_DDR4_BASE);
 		for (x = 0; x < 1024; x++)
@@ -2545,6 +2551,13 @@ int run_cmd_d202(StructMsg *pMsg)
 			if (cmd_str_1[x] == '\0')  break;
 		}
 		i=temp+2048;
+//		f_getfree("", &Free_Clust, &fs);
+//		if(Free_Clust<9)
+//		{
+//			xil_printf("have no storge space!Free_Clust:%u\r\n,",Free_Clust);
+//			return 1;
+//		}
+
 #if     1	//覆盖写入
 		ret = f_open(&wfile,cmd_str_11, FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
 		if (ret != FR_OK)
@@ -2591,7 +2604,7 @@ int run_cmd_d202(StructMsg *pMsg)
 					 return ret;
 				}
 				cmd_write_cnt += 1;
-				xil_printf("buff:0x%lx  len:0x%lx\r\n",buff,len);
+//				xil_printf("buff:0x%lx  len:0x%lx\r\n",buff,len);
 			}
 			else
 			{
@@ -2808,7 +2821,7 @@ int run_cmd_d205(BYTE* name,uint8_t mode)
 	  int br;
 	  uint32_t  r_count=0,cmd_len=0;;
 	  uint32_t  MODE=0;
-	  uint32_t  buff_r=(void *)(0x80000000);
+	  uint32_t  buff_r=(void *)(0x90000000);
 
 	  xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 	  switch(mode)
@@ -3032,6 +3045,7 @@ int run_cmd_d205_2(BYTE* name,int read_time,uint8_t mode)
 				 xil_printf("TxSend Failed! ret=%d\r\n", ret);
 				 return ret;
 			}
+
 			do
 			{
 				RxReceive(DestinationBuffer_1,&cmd_len);
@@ -3101,6 +3115,7 @@ int run_cmd_d205_8x(BYTE* name)
 {
 	  int i=0,x=0,Status,ret,h=0,time=1;
 	  uint8_t sts=0;
+	  uint32_t num=0;
 	  int64_t size=0,LastPack_Size=0,len=0;
 	  int br;
 	  uint32_t  r_count=0,cmd_len=0;;
@@ -3110,7 +3125,6 @@ int run_cmd_d205_8x(BYTE* name)
 	  xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 //	  ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
 	  ret = f_open(&rfile,"G", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
-//	  ret = f_open(&rfile,"111", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
 	  if (ret != FR_OK)
 	  {
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
@@ -3140,7 +3154,6 @@ int run_cmd_d205_8x(BYTE* name)
 		  xil_printf("TxSend Failed! ret=%d\r\n", ret);
 		  return ret;
 	  }
-
 //开始读取
 	  while(1)
 	  {
@@ -3187,9 +3200,13 @@ int run_cmd_d205_8x(BYTE* name)
 				 xil_printf("TxSend Failed! ret=%d\r\n", ret);
 				 return ret;
 			}
-
-			if(r_count>2)
+//			RxReceive(DestinationBuffer_1,&cmd_len);
+//			num=XLlFifo_iTxVacancy(&Fifo0);
+//			xil_printf("num=%d\r\n", num);
+//			if(r_count>3)
+			if(r_count>5)
 			{
+//				while(XLlFifo_IsRxEmpty(&Fifo0)!=FALSE);
 				do
 				{
 					RxReceive(DestinationBuffer_1,&cmd_len);
@@ -3420,20 +3437,23 @@ int run_cmd_d204(StructMsg *pMsg)
     i=temp+2048;
 	Read_mode=CW32(pMsg->MsgData[i+0],pMsg->MsgData[i+1],pMsg->MsgData[i+2],pMsg->MsgData[i+3]);
 	i+=4;
-	x0=((Read_mode>>0)&0x1==1)?1:0;     //x0=1为流式读取,x0=0为分包读取
+	x0=(((Read_mode>>0)&0x1)==1)?1:0;     //x0=1为流式读取,x0=0为分包读取
 
-	x1=((Read_mode>>4)&0x1==0)?0:		//x1=0为通过网口回传读数据,x1=1为通过GTH 1x回传数据,x1=2为通过GTH 8x回传数据
-				((Read_mode>>4)&0x1==1)?1:2;
-	x2=((Read_mode>>8)&0x1==1)?1:0;		//x2=0为一次读完 x2=1为循环回读
+	x1=(((Read_mode>>4)&0x1)==0)?0:		//x1=0为通过网口回传读数据,x1=1为通过GTH 1x回传数据,x1=2为通过GTH 8x回传数据
+				(((Read_mode>>4)&0x1)==1)?1:2;
+	x2=(((Read_mode>>8)&0x1)==1)?1:0;		//x2=0为一次读完 x2=1为循环回读
 	Read_time=CW32(pMsg->MsgData[i+0],pMsg->MsgData[i+1],pMsg->MsgData[i+2],pMsg->MsgData[i+3]);
 
-	if(flag_tcp==1)
+	if(x1!=2)
 	{
-		x1=0;
-	}
-	else if(flag_1x==1)
-	{
-		x1=1;
+		if(flag_tcp==1)
+		{
+			x1=0;
+		}
+		else if(flag_1x==1)
+		{
+			x1=1;
+		}
 	}
 
 #if 1   //
@@ -3563,16 +3583,16 @@ int run_cmd_d208(BYTE* name,uint8_t mode)
 	  }
 	  size=((f_size(&rfile)%4)==0?f_size(&rfile):(f_size(&rfile)/4+1)*4);
 	  len=size;
-	  if(size>Read_Packet_Size)
+	  if(size>Read_Packet_Size1)
 	  {
-		  time=size/Read_Packet_Size+1;
-		  len=Read_Packet_Size;
-		  LastPack_Size=((size%Read_Packet_Size)/4+1)*4;
-		  if((size%Read_Packet_Size)==0)
+		  time=size/Read_Packet_Size1+1;
+		  len=Read_Packet_Size1;
+		  LastPack_Size=((size%Read_Packet_Size1)/4+1)*4;
+		  if((size%Read_Packet_Size1)==0)
 		  {
-			  time=size/Read_Packet_Size;
-			  len=Read_Packet_Size;
-			  LastPack_Size=Read_Packet_Size;
+			  time=size/Read_Packet_Size1;
+			  len=Read_Packet_Size1;
+			  LastPack_Size=Read_Packet_Size1;
 		  }
 	  }
 	  //告诉fpga切换模式
@@ -3601,7 +3621,7 @@ int run_cmd_d208(BYTE* name,uint8_t mode)
 					return ret;
 			}
 			r_count++;
-
+			usleep(100000);
 			//sfifo发送长度
 			DestinationBuffer_1[0]=len;
 			DestinationBuffer_1[1]=buff_r;

@@ -16,6 +16,7 @@ BEGIN PROCESSOR
  PARAMETER DRIVER_VER = 2.9
  PARAMETER HW_INSTANCE = microblaze_1
  PARAMETER compiler_flags =  -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -mno-xl-soft-div -mcpu=v11.0
+ PARAMETER extra_compiler_flags = -ffunction-sections -fdata-sections -Wall -Wextra -g
 END
 
 

@@ -209,8 +209,8 @@
 
 
 //#define FF_MIN_GPT		0x20000000    //4.17改 之前是0x10000000 导致能分配的最多簇数只能到0x10000000/4096=65536
-//#define FF_MIN_GPT			0x60000000    //5.21改 适配6t磁盘,1片DDR的参数
-#define FF_MIN_GPT			0x40000000    //6.14改 适配4t磁盘,1片DDR的参数
+#define FF_MIN_GPT			0x60000000    //5.21改 适配6t磁盘,1片DDR的参数
+//#define FF_MIN_GPT			0x40000000    //6.14改 适配4t磁盘,1片DDR的参数
 //#define FF_MIN_GPT			0x3E80000		  //5.21改 适配现有zu7的硬件环境
 
 /* Minimum number of sectors to switch GPT as partitioning format in f_mkfs and

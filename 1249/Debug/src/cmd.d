@@ -27,7 +27,10 @@ src/cmd.o src/cmd.o: ../src/cmd.c ../src/cmd.h \
  ../../1249_bsp/microblaze_1/include/xdebug.h \
  ../../1249_bsp/microblaze_1/include/xintc.h \
  ../../1249_bsp/microblaze_1/include/xintc_l.h \
- ../../1249_bsp/microblaze_1/include/xuartLite.h
+ ../../1249_bsp/microblaze_1/include/xuartLite.h \
+ ../../1249_bsp/microblaze_1/include/xllfifo.h \
+ ../../1249_bsp/microblaze_1/include/xstreamer.h \
+ ../../1249_bsp/microblaze_1/include/xllfifo_hw.h
 
 ../src/cmd.h:
 
@@ -98,3 +101,9 @@ src/cmd.o src/cmd.o: ../src/cmd.c ../src/cmd.h \
 ../../1249_bsp/microblaze_1/include/xintc_l.h:
 
 ../../1249_bsp/microblaze_1/include/xuartLite.h:
+
+../../1249_bsp/microblaze_1/include/xllfifo.h:
+
+../../1249_bsp/microblaze_1/include/xstreamer.h:
+
+../../1249_bsp/microblaze_1/include/xllfifo_hw.h:

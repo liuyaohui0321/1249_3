@@ -1,0 +1,13 @@
+com.xilinx.sdk.linkgen.prefs.1249\:.bss=ddr4_0_C0_DDR4_ADDRESS_BLOCK
+com.xilinx.sdk.linkgen.prefs.1249\:.data=ddr4_0_C0_DDR4_ADDRESS_BLOCK
+com.xilinx.sdk.linkgen.prefs.1249\:.rodata=ddr4_0_C0_DDR4_ADDRESS_BLOCK
+com.xilinx.sdk.linkgen.prefs.1249\:.sbss=ddr4_0_C0_DDR4_ADDRESS_BLOCK
+com.xilinx.sdk.linkgen.prefs.1249\:.sbss2=ddr4_0_C0_DDR4_ADDRESS_BLOCK
+com.xilinx.sdk.linkgen.prefs.1249\:.sdata=ddr4_0_C0_DDR4_ADDRESS_BLOCK
+com.xilinx.sdk.linkgen.prefs.1249\:.sdata2=ddr4_0_C0_DDR4_ADDRESS_BLOCK
+com.xilinx.sdk.linkgen.prefs.1249\:.text=microblaze_1_local_memory_ilmb_bram_if_cntlr_Mem_microblaze_1_local_memory_dlmb_bram_if_cntlr_Mem
+com.xilinx.sdk.linkgen.prefs.1249\:heap=microblaze_1_local_memory_ilmb_bram_if_cntlr_Mem_microblaze_1_local_memory_dlmb_bram_if_cntlr_Mem
+com.xilinx.sdk.linkgen.prefs.1249\:heap-size=1024
+com.xilinx.sdk.linkgen.prefs.1249\:stack=microblaze_1_local_memory_ilmb_bram_if_cntlr_Mem_microblaze_1_local_memory_dlmb_bram_if_cntlr_Mem
+com.xilinx.sdk.linkgen.prefs.1249\:stack-size=1024
+eclipse.preferences.version=1
