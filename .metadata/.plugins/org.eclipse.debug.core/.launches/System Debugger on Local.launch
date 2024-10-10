@@ -8,7 +8,7 @@
 <stringAttribute key="com.xilinx.sdk.tcf.debug.uidebug.type" value="STANDALONE_DEBUG"/>
 <booleanAttribute key="com.xilinx.sdk.tcf.debug.uienable.crosstrigger" value="false"/>
 <stringAttribute key="com.xilinx.sdk.tcf.debug.uifpga.device" value="Auto Detect"/>
-<stringAttribute key="com.xilinx.sdk.tcf.debug.uihw.bit.file" value="C:\Users\LIUYAOHUI\Desktop\1249_3\top0822c_hw_platform_0\top.bit"/>
+<stringAttribute key="com.xilinx.sdk.tcf.debug.uihw.bit.file" value="C:\Users\LIUYAOHUI\Desktop\1249_3\top0822c_hw_platform_0\top0928.bit"/>
 <stringAttribute key="com.xilinx.sdk.tcf.debug.uihw.init.tcl" value=""/>
 <stringAttribute key="com.xilinx.sdk.tcf.debug.uihw_platform.name" value="top0822c_hw_platform_0"/>
 <booleanAttribute key="com.xilinx.sdk.tcf.debug.uipl.powerup" value="false"/>

@@ -50,7 +50,7 @@ int result_d205=0x0;
 int result_d20A=0x0;
 int result_f201=0x0;
 int Read_Packet_Size=0x10000000;
-//int Read_Packet_Size1=0x1000;
+//int Read_Packet_Size1=0x100000;
 int Read_Packet_Size1=0x10000000;
 //uint8_t HasCreat=0;
 uint8_t Stop_read=0;
@@ -3444,16 +3444,13 @@ int run_cmd_d204(StructMsg *pMsg)
 	x2=(((Read_mode>>8)&0x1)==1)?1:0;		//x2=0为一次读完 x2=1为循环回读
 	Read_time=CW32(pMsg->MsgData[i+0],pMsg->MsgData[i+1],pMsg->MsgData[i+2],pMsg->MsgData[i+3]);
 
-	if(x1!=2)
+	if((flag_tcp==1)&&(x1==0))
 	{
-		if(flag_tcp==1)
-		{
-			x1=0;
-		}
-		else if(flag_1x==1)
-		{
-			x1=1;
-		}
+		x1=0;
+	}
+	else if((flag_1x==1)&&(x1==0))
+	{
+		x1=1;
 	}
 
 #if 1   //
@@ -3555,10 +3552,10 @@ int run_cmd_d208(BYTE* name,uint8_t mode)
 	  uint8_t sts=0;
 	  int64_t size=0,LastPack_Size=0;
 	  int br;
-	  uint32_t  r_count=0,cmd_len=0;;
+	  uint32_t  r_count=0,cmd_len=0;
 	  uint32_t  len,MODE=0;
 	  uint32_t  buff_r=(void *)(0x90000000);
-
+	  uint32_t  Tx_time=0,Tx_len=0,Tx_lastsize=0;
 	  xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 	  switch(mode)
 	  {
@@ -3621,24 +3618,33 @@ int run_cmd_d208(BYTE* name,uint8_t mode)
 					return ret;
 			}
 			r_count++;
-			usleep(100000);
-			//sfifo发送长度
-			DestinationBuffer_1[0]=len;
-			DestinationBuffer_1[1]=buff_r;
-//			XLLFIFO_SysInit();
-//			Xil_L1DCacheFlush();
-
-			ret = TxSend(DestinationBuffer_1,8);
-			if (ret != XST_SUCCESS)
+			Internal_count(&len,&Tx_time,&Tx_lastsize,&Tx_len);
+			for(int k=0;k<Tx_time;k++)
 			{
-				 xil_printf("TxSend Failed! ret=%d\r\n", ret);
-				 return ret;
+				if(k==Tx_time-1)
+				{
+					Tx_len=Tx_lastsize;
+				}
+				usleep(10000);
+				//sfifo发送长度
+				DestinationBuffer_1[0]=Tx_len;
+				DestinationBuffer_1[1]=buff_r;
+	//			XLLFIFO_SysInit();
+	//			Xil_L1DCacheFlush();
+
+				ret = TxSend(DestinationBuffer_1,8);
+				if (ret != XST_SUCCESS)
+				{
+					 xil_printf("TxSend Failed! ret=%d\r\n", ret);
+					 return ret;
+				}
+				do
+				{
+					RxReceive(DestinationBuffer_1,&cmd_len);
+				}while(!(0xaa55aa55 == DestinationBuffer_1[0]));
+				buff_r+=Tx_len/2;
 			}
-			do
-			{
-				RxReceive(DestinationBuffer_1,&cmd_len);
-			}while(!(0xaa55aa55 == DestinationBuffer_1[0]));
-
+			buff_r=(void *)(0x90000000);
 			for(i=0;i<NHC_NUM;i++)
 			{
 					while (nhc_queue_ept(i) == 0)
@@ -3825,3 +3831,29 @@ int cmd_reply_health_f201(void)
 		return 0;
 }
 
+void Internal_count(uint32_t *LEN,uint32_t *TIME,uint32_t *LastSize,uint32_t *Length)
+{
+	  uint32_t len=*LEN;
+	  uint32_t time=0,lastSize=0,length=0;
+	  if(len>0x1000)
+	  {
+		  time=len/0x1000+1;
+		  length=0x1000;
+		  lastSize=((len%0x1000)/4+1)*4;
+		  if((len%0x1000)==0)
+		  {
+			  time=len/0x1000;
+			  length=0x1000;
+			  lastSize=0x1000;
+		  }
+	  }
+	  else if(len==0x1000)
+	  {
+		  time=1;
+		  lastSize=0x1000;
+		  length=0x1000;
+	  }
+	  *TIME=time;
+	  *LastSize=lastSize;
+	  *Length=length;
+}
