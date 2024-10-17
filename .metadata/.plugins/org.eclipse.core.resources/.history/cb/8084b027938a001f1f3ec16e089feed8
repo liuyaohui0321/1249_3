@@ -259,12 +259,12 @@ void cmd_type_id_parse(StructMsg *pMsg)
 //								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
 //							}
 						break;
-						case 0x3:
-							for(i=0; i < TMsg.DataLen; i++)
-							{
-								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
-							}
-						break;
+//						case 0x3:
+//							for(i=0; i < TMsg.DataLen; i++)
+//							{
+//								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
+//							}
+//						break;
 						case 0x4:
 							for(i=0; i < TMsg.DataLen; i++)
 							{

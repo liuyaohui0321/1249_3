@@ -1,330 +1,5 @@
-11:22:37 **** Build of configuration Debug for project 1249 ****
+09:16:50 **** Auto Build of configuration Debug for project 1249 ****
 make all 
-'Building file: ../src/fat/diskio.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/fat/diskio.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/fat/diskio.d" -MT"src/fat/diskio.o" -o "src/fat/diskio.o" "../src/fat/diskio.c"
-../src/fat/diskio.c: In function 'disk_read':
-../src/fat/diskio.c:62:5: warning: implicit declaration of function 'io_read4'; did you mean 'io_read2'? [-Wimplicit-function-declaration]
-  if(io_read4(NHC_NUM,0x1, buff,slba, (uint32_t)len, 0x0) != 0x2)
-     ^~~~~~~~
-     io_read2
-../src/fat/diskio.c: In function 'disk_read1':
-../src/fat/diskio.c:84:5: warning: implicit declaration of function 'io_read3'; did you mean 'io_read2'? [-Wimplicit-function-declaration]
-  if(io_read3(NHC_NUM,0x1, buff,slba, (uint32_t)len, 0x0) != 0x2)
-     ^~~~~~~~
-     io_read2
-../src/fat/diskio.c: In function 'disk_write':
-../src/fat/diskio.c:125:28: warning: passing argument 3 of 'io_write2' makes integer from pointer without a cast [-Wint-conversion]
-  if(io_write2(NHC_NUM,0x1, buff,sector*SECTORSIZE, (uint32_t)(count*SECTORSIZE), 0x0) != 0x2)//lyh
-                            ^~~~
-In file included from ../src/fat/diskio.c:12:
-../src/fat/../nhc_amba.h:103:60: note: expected 'uint32_t' {aka 'long unsigned int'} but argument is of type 'const BYTE *' {aka 'const unsigned char *'}
- uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm);
-                                                   ~~~~~~~~~^~~~
-../src/fat/diskio.c: In function 'disk_write1':
-../src/fat/diskio.c:140:28: warning: passing argument 3 of 'io_write2' makes integer from pointer without a cast [-Wint-conversion]
-  if(io_write2(NHC_NUM,0x1, buff,sector*SECTORSIZE, (uint32_t)(count*SECTORSIZE), 0x0) != 0x2)//lyh
-                            ^~~~
-In file included from ../src/fat/diskio.c:12:
-../src/fat/../nhc_amba.h:103:60: note: expected 'uint32_t' {aka 'long unsigned int'} but argument is of type 'const BYTE *' {aka 'const unsigned char *'}
- uint8_t io_write2(uint8_t nhc_num, uint32_t nsid, uint32_t addr, uint64_t slba, uint32_t len, uint32_t dsm);
-                                                   ~~~~~~~~~^~~~
-../src/fat/diskio.c: In function 'disk_ioctl':
-../src/fat/diskio.c:160:6: warning: unused variable 'result' [-Wunused-variable]
-  int result;
-      ^~~~~~
-../src/fat/diskio.c:159:10: warning: variable 'res' set but not used [-Wunused-but-set-variable]
-  DRESULT res;
-          ^~~
-../src/fat/diskio.c:181:1: warning: control reaches end of non-void function [-Wreturn-type]
- }
- ^
-'Finished building: ../src/fat/diskio.c'
-' '
-'Building file: ../src/fat/ff.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/fat/ff.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/fat/ff.d" -MT"src/fat/ff.o" -o "src/fat/ff.o" "../src/fat/ff.c"
-../src/fat/ff.c: In function 'move_window':
-../src/fat/ff.c:1147:8: warning: implicit declaration of function 'disk_read2'; did you mean 'disk_read1'? [-Wimplicit-function-declaration]
-    if (disk_read2(fs->pdrv, (BYTE *)(0xA0001000), sect, 1) != RES_OK) {
-        ^~~~~~~~~~
-        disk_read1
-../src/fat/ff.c: In function 'f_mkfs':
-../src/fat/ff.c:6347:3: warning: implicit declaration of function 'xil_printf'; did you mean 'f_printf'? [-Wimplicit-function-declaration]
-   xil_printf("\n\n\n##############111 sz_blk=%lu##############\n\n\n",  sz_blk);
-   ^~~~~~~~~~
-   f_printf
-../src/fat/ff.c:6377:14: warning: passing argument 2 of 'memcpy' makes pointer from integer without a cast [-Wint-conversion]
-   memcpy(buf,0xA0001000,SECTORSIZE*1);
-              ^~~~~~~~~~
-In file included from ../src/fat/ff.c:22:
-d:\xilinx\sdk\2019.1\gnu\microblaze\nt\microblaze-xilinx-elf\include\string.h:31:9: note: expected 'const void * restrict' but argument is of type 'unsigned int'
- void *  memcpy (void *__restrict, const void *__restrict, size_t);
-         ^~~~~~
-../src/fat/ff.c:6389:15: warning: passing argument 2 of 'memcpy' makes pointer from integer without a cast [-Wint-conversion]
-    memcpy(buf,0xA0001000,SECTORSIZE*1);
-               ^~~~~~~~~~
-In file included from ../src/fat/ff.c:22:
-d:\xilinx\sdk\2019.1\gnu\microblaze\nt\microblaze-xilinx-elf\include\string.h:31:9: note: expected 'const void * restrict' but argument is of type 'unsigned int'
- void *  memcpy (void *__restrict, const void *__restrict, size_t);
-         ^~~~~~
-../src/fat/ff.c:6839:15: warning: passing argument 2 of 'memcpy' makes pointer from integer without a cast [-Wint-conversion]
-    memcpy(buf,0xA0001000,SECTORSIZE*1);
-               ^~~~~~~~~~
-In file included from ../src/fat/ff.c:22:
-d:\xilinx\sdk\2019.1\gnu\microblaze\nt\microblaze-xilinx-elf\include\string.h:31:9: note: expected 'const void * restrict' but argument is of type 'unsigned int'
- void *  memcpy (void *__restrict, const void *__restrict, size_t);
-         ^~~~~~
-../src/fat/ff.c: In function 'my_fcopy':
-../src/fat/ff.c:7579:13: warning: implicit declaration of function 'wjq_malloc_m'; did you mean '_malloc_r'? [-Wimplicit-function-declaration]
-  fsrc=(FIL*)wjq_malloc_m(sizeof(FIL));//闂傚倸鍊搁崐鎼佸磹閻戣姤鍊块柨鏇炲�归崕鎴犳喐閻�?牆绗掗柛銊ュ�婚幉鎼佹偋閸繄鐟查梺绋款儛娴滎亪寮诲☉銏犖ㄦい鏃傚帶閳锋帡姊烘潪鎵槮妞ゆ垵妫濇俊鐢稿礋椤栨氨顔婇梺鐟扮摠缁诲秵绂掗懖鈺冪＝濞撴艾锕ョ�氬綊姊洪崨濠傚Е闁哥姵顨婇幃锟犲即閻旇櫣顔曢梺鐟扮摠缁诲�?�鎳滅憴鍕垫闁绘劘鎻懓鍧楁煛瀹�锟介崰鏍ь嚕椤掑嫬围闁糕剝顨忔导锟�?
-             ^~~~~~~~~~~~
-             _malloc_r
-../src/fat/ff.c:7631:4: warning: implicit declaration of function 'wjq_free_m'; did you mean '_free_r'? [-Wimplicit-function-declaration]
-    wjq_free_m(fsrc);
-    ^~~~~~~~~~
-    _free_r
-../src/fat/ff.c: In function 'my_dcopy':
-../src/fat/ff.c:7671:20: warning: assignment to 'u8 *' {aka 'unsigned char *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
-         srcpathname=wjq_malloc_m((FF_LFN_BUF+1)*2);        // 闂傚倸鍊搁崐鎼佸磹閻戣姤鍊块柨鏇炲�归崕鎴犳喐閻�?牆绗掗柛銊ュ�婚幉鎼佹偋閸繄鐟查梺绋款儛娴滎亪寮诲☉銏犖ㄦい鏃傚帶閳锋帡姊烘潪鎵槮妞ゆ垵顦靛濠氬Ω閳哄�?�浜為梺绋挎湰缁嬫垿顢旈敓锟�? srcpathname闂傚倸鍊搁崐鎼佸磹妞嬪海鐭嗗〒姘炬嫹妤犵偛顦甸弫鎾绘偐閼碱剦妲烽梻浣告惈濞层垽宕归崷顓犱笉闁绘顕х粻瑙勭箾閿濆骸澧┑鈥茬矙閺屾稓锟斤絻鍔岄敓鑺ョ箞瀵濡搁埡鍌氫簽闂佺鏈粙鎴︻敂閿燂�?
-                    ^
-../src/fat/ff.c:7672:20: warning: assignment to 'u8 *' {aka 'unsigned char *'} from 'int' makes pointer from integer without a cast [-Wint-conversion]
-         dstpathname=wjq_malloc_m((FF_LFN_BUF+1)*2);        // 闂傚倸鍊搁崐鎼佸磹閻戣姤鍊块柨鏇炲�归崕鎴犳喐閻�?牆绗掗柛銊ュ�婚幉鎼佹偋閸繄鐟查梺绋款儛娴滎亪寮诲☉銏犖ㄦい鏃傚帶閳锋帡姊烘潪鎵槮妞ゆ垵顦靛濠氭晲婢跺锟藉鏌涢妷銏℃珦闁哥喎锟斤拷pathname闂傚倸鍊搁崐鎼佸磹妞嬪海鐭嗗〒姘炬嫹妤犵偛顦甸弫鎾绘偐閼碱剦妲烽梻浣告惈濞层垽宕归崷顓犱笉闁绘顕х粻瑙勭箾閿濆骸澧┑鈥茬矙閺屾稓锟斤絻鍔岄敓鑺ョ箞瀵濡搁埡鍌氫簽闂佺鏈粙鎴︻敂閿燂�?
-                    ^
-../src/fat/ff.c:7684:34: warning: pointer targets in passing argument 1 of 'get_src_dname' differ in signedness [-Wpointer-sign]
-                 fn=get_src_dname(psrc);
-                                  ^~~~
-../src/fat/ff.c:7638:5: note: expected 'BYTE *' {aka 'unsigned char *'} but argument is of type 'TCHAR *' {aka 'char *'}
- u8* get_src_dname(BYTE* dpfn)
-     ^~~~~~~~~~~~~
-../src/fat/ff.c:7709:55: warning: pointer targets in passing argument 1 of 'my_dcopy' differ in signedness [-Wpointer-sign]
-                                 res=(FRESULT)my_dcopy(srcpathname,dstpathname,fwmode);         // 闂傚倸鍊搁崐鎼佸磹妞嬪海鐭嗗ù锝堟缁�濠傗攽閻樺弶纭藉鑸靛姇缁犲鎮归崶顏勮敿闁硅姤娲樼换婵嬪閿濆棛銆愰梺娲诲墮閵堟悂骞嗗畝鍕耿婵°倕锕﹂崬鐢告⒑閸忓吋鍊愭繛浣冲嫭鍙忛柛銉ｅ妺缁诲棙銇勯幇鍓佺Ф闁兼澘娼￠弻锛勪沪閸撗勫垱婵犵绱曢崗姗�銆佸☉銏�?��烽柟纰卞弿閹峰嘲顓奸崪浣瑰瘜闂侀潧鐗嗗Λ妤佹叏鐏炲彞绻嗘い鎰╁灩椤忣參鏌嶉妷顖氼洭闁圭懓�?�版俊鎼佹晝閿熶粙顢撳☉銏＄厽闁绘柨鎽滈幊鍐�?�濮樼厧澧存い銏℃閺佹捇鏁撻敓锟�
-                                                       ^~~~~~~~~~~
-../src/fat/ff.c:7653:9: note: expected 'TCHAR *' {aka 'char *'} but argument is of type 'u8 *' {aka 'unsigned char *'}
- FRESULT my_dcopy(TCHAR *psrc,TCHAR *pdst,u8 fwmode)
-         ^~~~~~~~
-../src/fat/ff.c:7709:67: warning: pointer targets in passing argument 2 of 'my_dcopy' differ in signedness [-Wpointer-sign]
-                                 res=(FRESULT)my_dcopy(srcpathname,dstpathname,fwmode);         // 闂傚倸鍊搁崐鎼佸磹妞嬪海鐭嗗ù锝堟缁�濠傗攽閻樺弶纭藉鑸靛姇缁犲鎮归崶顏勮敿闁硅姤娲樼换婵嬪閿濆棛銆愰梺娲诲墮閵堟悂骞嗗畝鍕耿婵°倕锕﹂崬鐢告⒑閸忓吋鍊愭繛浣冲嫭鍙忛柛銉ｅ妺缁诲棙銇勯幇鍓佺Ф闁兼澘娼￠弻锛勪沪閸撗勫垱婵犵绱曢崗姗�銆佸☉銏�?��烽柟纰卞弿閹峰嘲顓奸崪浣瑰瘜闂侀潧鐗嗗Λ妤佹叏鐏炲彞绻嗘い鎰╁灩椤忣參鏌嶉妷顖氼洭闁圭懓�?�版俊鎼佹晝閿熶粙顢撳☉銏＄厽闁绘柨鎽滈幊鍐�?�濮樼厧澧存い銏℃閺佹捇鏁撻敓锟�
-                                                                   ^~~~~~~~~~~
-../src/fat/ff.c:7653:9: note: expected 'TCHAR *' {aka 'char *'} but argument is of type 'u8 *' {aka 'unsigned char *'}
- FRESULT my_dcopy(TCHAR *psrc,TCHAR *pdst,u8 fwmode)
-         ^~~~~~~~
-../src/fat/ff.c:7714:42: warning: pointer targets in passing argument 1 of 'my_fcopy' differ in signedness [-Wpointer-sign]
-                                 my_fcopy(srcpathname,dstpathname,fwmode);         // 闂傚倸鍊搁崐鎼佸磹妞嬪海鐭嗗ù锝堟缁�濠傗攽閻樺弶纭藉鑸靛姇缁犲鎮归崶顏勮敿闁硅姤娲樼换婵嬪閿濆棛銆愰梺娲诲墮閵堟悂骞嗗畝鍕耿婵°倕锕﹂崬鐢告⒑閸忓吋鍊愭繛浣冲嫭鍙忛柛銉ｅ妺缁诲棙銇勯幇鍓佺Ф闁兼澘娼￠弻锛勪沪閸撗勫垱婵犵绱曢崗姗�銆佸☉銏�?��烽柟纰卞弿閹峰嘲顓奸崪浣瑰瘜闂侀潧鐗嗗Λ妤佹叏鐏炲彞绻嗘い鎰╁灩椤忣參鏌嶉妷顖氼洭闁圭懓�?�版俊鎼佹晝閿熶粙顢撳☉銏＄厽闁绘柨鎽滈幊鍐�?�濮樼厧澧存い銏℃閺佹捇鏁撻敓锟�
-                                          ^~~~~~~~~~~
-../src/fat/ff.c:7569:9: note: expected 'TCHAR *' {aka 'char *'} but argument is of type 'u8 *' {aka 'unsigned char *'}
- FRESULT my_fcopy(TCHAR *psrc,TCHAR *pdst,u8 fwmode)
-         ^~~~~~~~
-../src/fat/ff.c:7714:54: warning: pointer targets in passing argument 2 of 'my_fcopy' differ in signedness [-Wpointer-sign]
-                                 my_fcopy(srcpathname,dstpathname,fwmode);         // 闂傚倸鍊搁崐鎼佸磹妞嬪海鐭嗗ù锝堟缁�濠傗攽閻樺弶纭藉鑸靛姇缁犲鎮归崶顏勮敿闁硅姤娲樼换婵嬪閿濆棛銆愰梺娲诲墮閵堟悂骞嗗畝鍕耿婵°倕锕﹂崬鐢告⒑閸忓吋鍊愭繛浣冲嫭鍙忛柛銉ｅ妺缁诲棙銇勯幇鍓佺Ф闁兼澘娼￠弻锛勪沪閸撗勫垱婵犵绱曢崗姗�銆佸☉銏�?��烽柟纰卞弿閹峰嘲顓奸崪浣瑰瘜闂侀潧鐗嗗Λ妤佹叏鐏炲彞绻嗘い鎰╁灩椤忣參鏌嶉妷顖氼洭闁圭懓�?�版俊鎼佹晝閿熶粙顢撳☉銏＄厽闁绘柨鎽滈幊鍐�?�濮樼厧澧存い銏℃閺佹捇鏁撻敓锟�
-                                                      ^~~~~~~~~~~
-../src/fat/ff.c:7569:9: note: expected 'TCHAR *' {aka 'char *'} but argument is of type 'u8 *' {aka 'unsigned char *'}
- FRESULT my_fcopy(TCHAR *psrc,TCHAR *pdst,u8 fwmode)
-         ^~~~~~~~
-../src/fat/ff.c: In function 'DestroyList':
-../src/fat/ff.c:7790:3: warning: implicit declaration of function 'wjq_free_t'; did you mean '_free_r'? [-Wimplicit-function-declaration]
-   wjq_free_t(curNode);
-   ^~~~~~~~~~
-   _free_r
-../src/fat/ff.c: In function 'record_struct_of_Dir_and_File':
-../src/fat/ff.c:7809:24: warning: pointer targets in passing argument 2 of 'f_opendir' differ in signedness [-Wpointer-sign]
-  res = f_opendir(&dir, path);                       /* Open the directory */
-                        ^~~~
-../src/fat/ff.c:5007:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
- FRESULT f_opendir (
-         ^~~~~~~~~
-../src/fat/ff.c:7816:16: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness [-Wpointer-sign]
-     i = strlen(path);
-                ^~~~
-In file included from ../src/fat/ff.c:22:
-d:\xilinx\sdk\2019.1\gnu\microblaze\nt\microblaze-xilinx-elf\include\string.h:41:9: note: expected 'const char *' but argument is of type 'BYTE *' {aka 'unsigned char *'}
- size_t  strlen (const char *);
-         ^~~~~~
-../src/fat/ff.c:7817:5: warning: implicit declaration of function 'sprintf' [-Wimplicit-function-declaration]
-     sprintf(&path[i], "/%s", fno.fname);
-     ^~~~~~~
-../src/fat/ff.c:7817:5: warning: incompatible implicit declaration of built-in function 'sprintf'
-../src/fat/ff.c:7817:5: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../src/fat/ff.c:26:1:
-+#include <stdio.h>
- #define MAX_PATHNAME_DEPTH  512+1 //
-../src/fat/ff.c:7817:5:
-     sprintf(&path[i], "/%s", fno.fname);
-     ^~~~~~~
-../src/fat/ff.c:7817:13: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
-     sprintf(&path[i], "/%s", fno.fname);
-             ^~~~~~~~
-../src/fat/ff.c:7817:13: note: expected 'char *' but argument is of type 'BYTE *' {aka 'unsigned char *'}
-../src/fat/ff.c:7821:18: warning: pointer targets in passing argument 1 of 'get_Dir_size' differ in signedness [-Wpointer-sign]
-     get_Dir_size(path,&node.data.size);
-                  ^~~~
-In file included from ../src/fat/ff.c:23:
-../src/fat/ff.h:367:9: note: expected 'TCHAR *' {aka 'char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
- FRESULT get_Dir_size(TCHAR *path,uint64_t*size);                  /* ��ȡĿ¼�Ĵ�С */
-         ^~~~~~~~~~~~
-../src/fat/ff.c:7822:21: warning: passing argument 1 of 'strcpy' from incompatible pointer type [-Wincompatible-pointer-types]
-     strcpy(node.data.name,path);
-            ~~~~~~~~~^~~~~
-In file included from ../src/fat/ff.c:22:
-d:\xilinx\sdk\2019.1\gnu\microblaze\nt\microblaze-xilinx-elf\include\string.h:38:8: note: expected 'char * restrict' but argument is of type 'u16 *' {aka 'short unsigned int *'}
- char  *strcpy (char *__restrict, const char *__restrict);
-        ^~~~~~
-../src/fat/ff.c:7822:27: warning: pointer targets in passing argument 2 of 'strcpy' differ in signedness [-Wpointer-sign]
-     strcpy(node.data.name,path);
-                           ^~~~
-In file included from ../src/fat/ff.c:22:
-d:\xilinx\sdk\2019.1\gnu\microblaze\nt\microblaze-xilinx-elf\include\string.h:38:8: note: expected 'const char * restrict' but argument is of type 'BYTE *' {aka 'unsigned char *'}
- char  *strcpy (char *__restrict, const char *__restrict);
-        ^~~~~~
-../src/fat/ff.c:7835:5: warning: incompatible implicit declaration of built-in function 'sprintf'
-     sprintf(filename,"%s/%s", path, fno.fname);
-     ^~~~~~~
-../src/fat/ff.c:7835:5: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../src/fat/ff.c:7840:21: warning: passing argument 1 of 'strcpy' from incompatible pointer type [-Wincompatible-pointer-types]
-     strcpy(node.data.name,filename);
-            ~~~~~~~~~^~~~~
-In file included from ../src/fat/ff.c:22:
-d:\xilinx\sdk\2019.1\gnu\microblaze\nt\microblaze-xilinx-elf\include\string.h:38:8: note: expected 'char * restrict' but argument is of type 'u16 *' {aka 'short unsigned int *'}
- char  *strcpy (char *__restrict, const char *__restrict);
-        ^~~~~~
-../src/fat/ff.c: In function 'get_Dir_size':
-../src/fat/ff.c:7924:5: warning: incompatible implicit declaration of built-in function 'sprintf'
-     sprintf(&path[i], "/%s", fno.fname);
-     ^~~~~~~
-../src/fat/ff.c:7924:5: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../src/fat/ff.c:7933:5: warning: incompatible implicit declaration of built-in function 'sprintf'
-     sprintf(filename,"%s/%s", path, fno.fname);
-     ^~~~~~~
-../src/fat/ff.c:7933:5: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../src/fat/ff.c: In function 'Num_of_Dir_and_File':
-../src/fat/ff.c:7962:27: warning: pointer targets in passing argument 2 of 'f_opendir' differ in signedness [-Wpointer-sign]
-     res = f_opendir(&dir, path);                       /* Open the directory */
-                           ^~~~
-../src/fat/ff.c:5007:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
- FRESULT f_opendir (
-         ^~~~~~~~~
-../src/fat/ff.c:7968:16: warning: pointer targets in passing argument 1 of 'strlen' differ in signedness [-Wpointer-sign]
-     i = strlen(path);
-                ^~~~
-In file included from ../src/fat/ff.c:22:
-d:\xilinx\sdk\2019.1\gnu\microblaze\nt\microblaze-xilinx-elf\include\string.h:41:9: note: expected 'const char *' but argument is of type 'BYTE *' {aka 'unsigned char *'}
- size_t  strlen (const char *);
-         ^~~~~~
-../src/fat/ff.c:7969:5: warning: incompatible implicit declaration of built-in function 'sprintf'
-     sprintf(&path[i], "/%s", fno.fname);
-     ^~~~~~~
-../src/fat/ff.c:7969:5: note: include '<stdio.h>' or provide a declaration of 'sprintf'
-../src/fat/ff.c:7969:13: warning: pointer targets in passing argument 1 of 'sprintf' differ in signedness [-Wpointer-sign]
-     sprintf(&path[i], "/%s", fno.fname);
-             ^~~~~~~~
-../src/fat/ff.c:7969:13: note: expected 'char *' but argument is of type 'BYTE *' {aka 'unsigned char *'}
-../src/fat/ff.c: In function 'get_path_dname':
-../src/fat/ff.c:8004:8: warning: pointer targets in assignment from 'char *' to 'u8 *' {aka 'unsigned char *'} differ in signedness [-Wpointer-sign]
-     des="";
-        ^
-../src/fat/ff.c: In function 'Storage_state1':
-../src/fat/ff.c:8018:17: warning: passing argument 2 of 'f_getfree' from incompatible pointer type [-Wincompatible-pointer-types]
-   f_getfree("", &free_clust, &fs);
-                 ^~~~~~~~~~~
-../src/fat/ff.c:5228:9: note: expected 'DWORD *' {aka 'long unsigned int *'} but argument is of type 'QWORD *' {aka 'long long unsigned int *'}
-  DWORD* nclst,  /* Pointer to a variable to return number of free clusters */
-  ~~~~~~~^~~~~
-../src/fat/ff.c:8032:28: warning: pointer targets in passing argument 1 of 'Num_of_Dir_and_File' differ in signedness [-Wpointer-sign]
-   res=Num_of_Dir_and_File ("",&file_num,&dir_num,0);
-                            ^~
-../src/fat/ff.c:7955:9: note: expected 'BYTE *' {aka 'unsigned char *'} but argument is of type 'char *'
- FRESULT Num_of_Dir_and_File (BYTE *path,DWORD *file_num,DWORD *dir_num,uint8_t mode)
-         ^~~~~~~~~~~~~~~~~~~
-../src/fat/ff.c:8032:31: warning: passing argument 2 of 'Num_of_Dir_and_File' from incompatible pointer type [-Wincompatible-pointer-types]
-   res=Num_of_Dir_and_File ("",&file_num,&dir_num,0);
-                               ^~~~~~~~~
-../src/fat/ff.c:7955:48: note: expected 'DWORD *' {aka 'long unsigned int *'} but argument is of type 'int *'
- FRESULT Num_of_Dir_and_File (BYTE *path,DWORD *file_num,DWORD *dir_num,uint8_t mode)
-                                         ~~~~~~~^~~~~~~~
-../src/fat/ff.c:8032:41: warning: passing argument 3 of 'Num_of_Dir_and_File' from incompatible pointer type [-Wincompatible-pointer-types]
-   res=Num_of_Dir_and_File ("",&file_num,&dir_num,0);
-                                         ^~~~~~~~
-../src/fat/ff.c:7955:64: note: expected 'DWORD *' {aka 'long unsigned int *'} but argument is of type 'int *'
- FRESULT Num_of_Dir_and_File (BYTE *path,DWORD *file_num,DWORD *dir_num,uint8_t mode)
-                                                         ~~~~~~~^~~~~~~
-../src/fat/ff.c: In function 'Storage_state2':
-../src/fat/ff.c:8049:10: warning: unused variable 'Fs' [-Wunused-variable]
-   FATFS *Fs=&fs;
-          ^~
-'Finished building: ../src/fat/ff.c'
-' '
-'Building file: ../src/fat/ffsystem.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/fat/ffsystem.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/fat/ffsystem.d" -MT"src/fat/ffsystem.o" -o "src/fat/ffsystem.o" "../src/fat/ffsystem.c"
-'Finished building: ../src/fat/ffsystem.c'
-' '
-'Building file: ../src/fat/ffunicode.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/fat/ffunicode.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/fat/ffunicode.d" -MT"src/fat/ffunicode.o" -o "src/fat/ffunicode.o" "../src/fat/ffunicode.c"
-'Finished building: ../src/fat/ffunicode.c'
-' '
-'Building file: ../src/FIFO.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/FIFO.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/FIFO.d" -MT"src/FIFO.o" -o "src/FIFO.o" "../src/FIFO.c"
-In file included from ../src/alloc.h:4,
-                 from ../src/FIFO.c:22:
-../../1249_bsp/microblaze_1/include/xbasic_types.h:120:2: warning: #warning The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert. [-Wcpp]
- #warning  The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert.
-  ^~~~~~~
-../../1249_bsp/microblaze_1/include/xbasic_types.h:121:2: warning: #warning Please refer the Standalone BSP UG647 for further details [-Wcpp]
- #warning  Please refer the Standalone BSP UG647 for further details
-  ^~~~~~~
-'Finished building: ../src/FIFO.c'
-' '
-'Building file: ../src/alloc.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/alloc.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/alloc.d" -MT"src/alloc.o" -o "src/alloc.o" "../src/alloc.c"
-In file included from ../src/alloc.h:4,
-                 from ../src/alloc.c:10:
-../../1249_bsp/microblaze_1/include/xbasic_types.h:120:2: warning: #warning The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert. [-Wcpp]
- #warning  The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert.
-  ^~~~~~~
-../../1249_bsp/microblaze_1/include/xbasic_types.h:121:2: warning: #warning Please refer the Standalone BSP UG647 for further details [-Wcpp]
- #warning  Please refer the Standalone BSP UG647 for further details
-  ^~~~~~~
-../src/alloc.c: In function 'wjq_malloc_t':
-../src/alloc.c:240:5: warning: implicit declaration of function 'xil_printf' [-Wimplicit-function-declaration]
-     xil_printf("wujique malloc err!!\r\n");
-     ^~~~~~~~~~
-../src/alloc.c: In function 'wjq_calloc':
-../src/alloc.c:281:3: warning: implicit declaration of function 'memset' [-Wimplicit-function-declaration]
-   memset((char*) p, 0, n*size);
-   ^~~~~~
-../src/alloc.c:281:3: warning: incompatible implicit declaration of built-in function 'memset'
-../src/alloc.c:281:3: note: include '<string.h>' or provide a declaration of 'memset'
-../src/alloc.c:11:1:
-+#include <string.h>
- /*
-../src/alloc.c:281:3:
-   memset((char*) p, 0, n*size);
-   ^~~~~~
-../src/alloc.c: In function 'wjq_realloc':
-../src/alloc.c:325:2: warning: implicit declaration of function 'memcpy' [-Wimplicit-function-declaration]
-  memcpy(bp, ap, newsize);
-  ^~~~~~
-../src/alloc.c:325:2: warning: incompatible implicit declaration of built-in function 'memcpy'
-../src/alloc.c:325:2: note: include '<string.h>' or provide a declaration of 'memcpy'
-../src/alloc.c:291:11: warning: unused variable 'aunits' [-Wunused-variable]
-  unsigned aunits;
-           ^~~~~~
-../src/alloc.c:288:21: warning: unused variable 'np' [-Wunused-variable]
-  ALLOC_HDR*bp, *p, *np;
-                     ^~
-../src/alloc.c:288:17: warning: unused variable 'p' [-Wunused-variable]
-  ALLOC_HDR*bp, *p, *np;
-                 ^
-../src/alloc.c: In function 'wjq_malloc_test':
-../src/alloc.c:394:2: warning: incompatible implicit declaration of built-in function 'memset'
-  memset(p, 0xf0, 1024);
-  ^~~~~~
-../src/alloc.c:394:2: note: include '<string.h>' or provide a declaration of 'memset'
-'Finished building: ../src/alloc.c'
-' '
 'Building file: ../src/cmd.c'
 'Invoking: MicroBlaze gcc compiler'
 mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/cmd.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/cmd.d" -MT"src/cmd.o" -o "src/cmd.o" "../src/cmd.c"
@@ -1011,7 +686,7 @@ In file included from ../src/cmd.h:8,
 ../src/cmd.c:2540:32: warning: operation on 'i' may be undefined [-Wsequence-point]
     unicode_u16=(pMsg->MsgData[i++]|pMsg->MsgData[i++]<<8);
                                ~^~
-../src/cmd.c:2562:23: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
+../src/cmd.c:2556:23: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
    ret = f_open(&wfile,cmd_str_11, FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
                        ^~~~~~~~~~
 In file included from ../src/cmd.h:8,
@@ -1019,7 +694,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:306:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
  FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);    /* Open or create a file */
          ^~~~~~
-../src/cmd.c:2596:6: warning: passing argument 2 of 'f_write1' makes pointer from integer without a cast [-Wint-conversion]
+../src/cmd.c:2590:6: warning: passing argument 2 of 'f_write1' makes pointer from integer without a cast [-Wint-conversion]
       buff,   /* Data to be written */
       ^~~~
 In file included from ../src/cmd.h:8,
@@ -1027,7 +702,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:311:40: note: expected 'const void *' but argument is of type 'uint32_t' {aka 'long unsigned int'}
  FRESULT f_write1 (FIL* fp, const void* buff, UINT btw, UINT* bw);
                             ~~~~~~~~~~~~^~~~
-../src/cmd.c:2598:6: warning: passing argument 4 of 'f_write1' from incompatible pointer type [-Wincompatible-pointer-types]
+../src/cmd.c:2592:6: warning: passing argument 4 of 'f_write1' from incompatible pointer type [-Wincompatible-pointer-types]
       &bw    /* Number of bytes written */
       ^~~
 In file included from ../src/cmd.h:8,
@@ -1042,13 +717,21 @@ In file included from ../src/cmd.h:8,
    uint32_t  len=0,Free_Clust=0;
                    ^~~~~~~~~~
 ../src/cmd.c: In function 'run_cmd_d203':
-../src/cmd.c:2658:20: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:2652:20: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
    uint32_t  buff = (void *)(MEM_DDR4_BASE);
                     ^
-../src/cmd.c:2662:32: warning: operation on 'i' may be undefined [-Wsequence-point]
+../src/cmd.c:2656:32: warning: operation on 'i' may be undefined [-Wsequence-point]
     unicode_u16=(pMsg->MsgData[i++]|pMsg->MsgData[i++]<<8);
                                ~^~
-../src/cmd.c:2772:6: warning: passing argument 2 of 'f_write1' makes pointer from integer without a cast [-Wint-conversion]
+../src/cmd.c:2674:23: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
+   ret = f_open(&wfile,cmd_str_11, FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
+                       ^~~~~~~~~~
+In file included from ../src/cmd.h:8,
+                 from ../src/cmd.c:1:
+../src/fat/ff.h:306:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
+ FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);    /* Open or create a file */
+         ^~~~~~
+../src/cmd.c:2766:6: warning: passing argument 2 of 'f_write1' makes pointer from integer without a cast [-Wint-conversion]
       buff,   /* Data to be written */
       ^~~~
 In file included from ../src/cmd.h:8,
@@ -1056,7 +739,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:311:40: note: expected 'const void *' but argument is of type 'uint32_t' {aka 'long unsigned int'}
  FRESULT f_write1 (FIL* fp, const void* buff, UINT btw, UINT* bw);
                             ~~~~~~~~~~~~^~~~
-../src/cmd.c:2774:6: warning: passing argument 4 of 'f_write1' from incompatible pointer type [-Wincompatible-pointer-types]
+../src/cmd.c:2768:6: warning: passing argument 4 of 'f_write1' from incompatible pointer type [-Wincompatible-pointer-types]
       &bw    /* Number of bytes written */
       ^~~
 In file included from ../src/cmd.h:8,
@@ -1064,20 +747,20 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:311:62: note: expected 'UINT *' {aka 'unsigned int *'} but argument is of type 'uint32_t *' {aka 'long unsigned int *'}
  FRESULT f_write1 (FIL* fp, const void* buff, UINT btw, UINT* bw);
                                                         ~~~~~~^~
-../src/cmd.c:2652:7: warning: unused variable 'file_cmd' [-Wunused-variable]
+../src/cmd.c:2646:7: warning: unused variable 'file_cmd' [-Wunused-variable]
    u32 file_cmd=0;
        ^~~~~~~~
-../src/cmd.c:2651:12: warning: unused variable 'Status' [-Wunused-variable]
+../src/cmd.c:2645:12: warning: unused variable 'Status' [-Wunused-variable]
    uint32_t Status=0,bw=0;
             ^~~~~~
-../src/cmd.c:2650:7: warning: unused variable 'k' [-Wunused-variable]
+../src/cmd.c:2644:7: warning: unused variable 'k' [-Wunused-variable]
    int k=0;
        ^
 ../src/cmd.c: In function 'run_cmd_d205':
-../src/cmd.c:2824:21: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:2818:21: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
     uint32_t  buff_r=(void *)(0x90000000);
                      ^
-../src/cmd.c:2844:24: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
+../src/cmd.c:2838:24: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
     ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
                         ^~~~
 In file included from ../src/cmd.h:8,
@@ -1085,7 +768,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:306:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
  FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);    /* Open or create a file */
          ^~~~~~
-../src/cmd.c:2882:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
+../src/cmd.c:2876:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
        buff_r,
        ^~~~~~
 In file included from ../src/cmd.h:8,
@@ -1093,7 +776,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:33: note: expected 'void *' but argument is of type 'uint32_t' {aka 'long unsigned int'}
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
                            ~~~~~~^~~~
-../src/cmd.c:2884:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
+../src/cmd.c:2878:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
        &br
        ^~~
 In file included from ../src/cmd.h:8,
@@ -1101,20 +784,20 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:9: note: expected 'UINT *' {aka 'unsigned int *'} but argument is of type 'int *'
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
          ^~~~~~~
-../src/cmd.c:2818:27: warning: unused variable 'h' [-Wunused-variable]
+../src/cmd.c:2812:27: warning: unused variable 'h' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
                            ^
-../src/cmd.c:2818:16: warning: unused variable 'Status' [-Wunused-variable]
+../src/cmd.c:2812:16: warning: unused variable 'Status' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
                 ^~~~~~
-../src/cmd.c:2818:12: warning: unused variable 'x' [-Wunused-variable]
+../src/cmd.c:2812:12: warning: unused variable 'x' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
             ^
 ../src/cmd.c: In function 'run_cmd_d205_2':
-../src/cmd.c:2967:20: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:2961:20: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
    uint32_t  buff_r=(void *)(0x80000000);
                     ^
-../src/cmd.c:2987:23: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
+../src/cmd.c:2981:23: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
    ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
                        ^~~~
 In file included from ../src/cmd.h:8,
@@ -1122,7 +805,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:306:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
  FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);    /* Open or create a file */
          ^~~~~~
-../src/cmd.c:3025:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
+../src/cmd.c:3019:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
        buff_r,
        ^~~~~~
 In file included from ../src/cmd.h:8,
@@ -1130,7 +813,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:33: note: expected 'void *' but argument is of type 'uint32_t' {aka 'long unsigned int'}
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
                            ~~~~~~^~~~
-../src/cmd.c:3027:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
+../src/cmd.c:3021:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
        &br
        ^~~
 In file included from ../src/cmd.h:8,
@@ -1138,20 +821,28 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:9: note: expected 'UINT *' {aka 'unsigned int *'} but argument is of type 'int *'
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
          ^~~~~~~
-../src/cmd.c:2961:26: warning: unused variable 'h' [-Wunused-variable]
+../src/cmd.c:2955:26: warning: unused variable 'h' [-Wunused-variable]
    int i=0,x=0,Status,ret,h=0,time=1;
                           ^
-../src/cmd.c:2961:15: warning: unused variable 'Status' [-Wunused-variable]
+../src/cmd.c:2955:15: warning: unused variable 'Status' [-Wunused-variable]
    int i=0,x=0,Status,ret,h=0,time=1;
                ^~~~~~
-../src/cmd.c:2961:11: warning: unused variable 'x' [-Wunused-variable]
+../src/cmd.c:2955:11: warning: unused variable 'x' [-Wunused-variable]
    int i=0,x=0,Status,ret,h=0,time=1;
            ^
 ../src/cmd.c: In function 'run_cmd_d205_8x':
-../src/cmd.c:3123:21: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:3117:21: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
     uint32_t  buff_r=(void *)(0x80000000);
                      ^
-../src/cmd.c:3162:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
+../src/cmd.c:3120:24: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
+    ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ|FA_WRITE);
+                        ^~~~
+In file included from ../src/cmd.h:8,
+                 from ../src/cmd.c:1:
+../src/fat/ff.h:306:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
+ FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);    /* Open or create a file */
+         ^~~~~~
+../src/cmd.c:3156:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
        buff_r,
        ^~~~~~
 In file included from ../src/cmd.h:8,
@@ -1159,7 +850,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:33: note: expected 'void *' but argument is of type 'uint32_t' {aka 'long unsigned int'}
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
                            ~~~~~~^~~~
-../src/cmd.c:3164:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
+../src/cmd.c:3158:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
        &br
        ^~~
 In file included from ../src/cmd.h:8,
@@ -1167,37 +858,37 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:9: note: expected 'UINT *' {aka 'unsigned int *'} but argument is of type 'int *'
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
          ^~~~~~~
-../src/cmd.c:3225:39: warning: assignment to 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:3219:39: warning: assignment to 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
         if(buff_r>=0xDFFFFFFF)   buff_r=(void *)(0x80000000);
                                        ^
-../src/cmd.c:3122:14: warning: unused variable 'MODE' [-Wunused-variable]
+../src/cmd.c:3116:14: warning: unused variable 'MODE' [-Wunused-variable]
     uint32_t  MODE=0;
               ^~~~
-../src/cmd.c:3118:13: warning: unused variable 'num' [-Wunused-variable]
+../src/cmd.c:3112:13: warning: unused variable 'num' [-Wunused-variable]
     uint32_t num=0;
              ^~~
-../src/cmd.c:3116:27: warning: unused variable 'h' [-Wunused-variable]
+../src/cmd.c:3110:27: warning: unused variable 'h' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
                            ^
-../src/cmd.c:3116:16: warning: unused variable 'Status' [-Wunused-variable]
+../src/cmd.c:3110:16: warning: unused variable 'Status' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
                 ^~~~~~
-../src/cmd.c:3116:12: warning: unused variable 'x' [-Wunused-variable]
+../src/cmd.c:3110:12: warning: unused variable 'x' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
             ^
 ../src/cmd.c: In function 'run_cmd_d205_2_8x':
-../src/cmd.c:3275:20: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:3269:20: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
    uint32_t  buff_r=(void *)(0x80000000);
                     ^
-../src/cmd.c:3279:23: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
-   ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
+../src/cmd.c:3273:23: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
+   ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ|FA_WRITE);
                        ^~~~
 In file included from ../src/cmd.h:8,
                  from ../src/cmd.c:1:
 ../src/fat/ff.h:306:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
  FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);    /* Open or create a file */
          ^~~~~~
-../src/cmd.c:3316:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
+../src/cmd.c:3310:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
        buff_r,
        ^~~~~~
 In file included from ../src/cmd.h:8,
@@ -1205,7 +896,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:33: note: expected 'void *' but argument is of type 'uint32_t' {aka 'long unsigned int'}
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
                            ~~~~~~^~~~
-../src/cmd.c:3318:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
+../src/cmd.c:3312:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
        &br
        ^~~
 In file included from ../src/cmd.h:8,
@@ -1213,39 +904,39 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:9: note: expected 'UINT *' {aka 'unsigned int *'} but argument is of type 'int *'
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
          ^~~~~~~
-../src/cmd.c:3357:36: warning: assignment to 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:3351:36: warning: assignment to 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
      if(buff_r>=0xDFFFFFFF)   buff_r=(void *)(0x80000000);
                                     ^
-../src/cmd.c:3370:15: warning: assignment to 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:3364:15: warning: assignment to 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
          buff_r=(void *)(0x80000000);
                ^
-../src/cmd.c:3274:13: warning: unused variable 'MODE' [-Wunused-variable]
+../src/cmd.c:3268:13: warning: unused variable 'MODE' [-Wunused-variable]
    uint32_t  MODE=0;
              ^~~~
-../src/cmd.c:3269:26: warning: unused variable 'h' [-Wunused-variable]
+../src/cmd.c:3263:26: warning: unused variable 'h' [-Wunused-variable]
    int i=0,x=0,Status,ret,h=0,time=1;
                           ^
-../src/cmd.c:3269:15: warning: unused variable 'Status' [-Wunused-variable]
+../src/cmd.c:3263:15: warning: unused variable 'Status' [-Wunused-variable]
    int i=0,x=0,Status,ret,h=0,time=1;
                ^~~~~~
-../src/cmd.c:3269:11: warning: unused variable 'x' [-Wunused-variable]
+../src/cmd.c:3263:11: warning: unused variable 'x' [-Wunused-variable]
    int i=0,x=0,Status,ret,h=0,time=1;
            ^
 ../src/cmd.c: In function 'run_cmd_d204':
-../src/cmd.c:3422:37: warning: operation on 'i' may be undefined [-Wsequence-point]
+../src/cmd.c:3416:37: warning: operation on 'i' may be undefined [-Wsequence-point]
          unicode_u16=(pMsg->MsgData[i++]|pMsg->MsgData[i++]<<8);
                                     ~^~
-../src/cmd.c:3417:7: warning: unused variable 'file' [-Wunused-variable]
+../src/cmd.c:3411:7: warning: unused variable 'file' [-Wunused-variable]
    FIL file;
        ^~~~
-../src/cmd.c:3412:17: warning: unused variable 'ret' [-Wunused-variable]
+../src/cmd.c:3406:17: warning: unused variable 'ret' [-Wunused-variable]
       int temp=0,ret=0,i=0,x=0,h=0;
                  ^~~
 ../src/cmd.c: In function 'run_cmd_d208':
-../src/cmd.c:3557:21: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:3551:21: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
     uint32_t  buff_r=(void *)(0x90000000);
                      ^
-../src/cmd.c:3573:24: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
+../src/cmd.c:3567:24: warning: pointer targets in passing argument 2 of 'f_open' differ in signedness [-Wpointer-sign]
     ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
                         ^~~~
 In file included from ../src/cmd.h:8,
@@ -1253,7 +944,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:306:9: note: expected 'const TCHAR *' {aka 'const char *'} but argument is of type 'BYTE *' {aka 'unsigned char *'}
  FRESULT f_open (FIL* fp, const TCHAR* path, BYTE mode);    /* Open or create a file */
          ^~~~~~
-../src/cmd.c:3611:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
+../src/cmd.c:3605:7: warning: passing argument 2 of 'f_read1' makes pointer from integer without a cast [-Wint-conversion]
        buff_r,
        ^~~~~~
 In file included from ../src/cmd.h:8,
@@ -1261,7 +952,7 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:33: note: expected 'void *' but argument is of type 'uint32_t' {aka 'long unsigned int'}
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
                            ~~~~~~^~~~
-../src/cmd.c:3613:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
+../src/cmd.c:3607:7: warning: pointer targets in passing argument 4 of 'f_read1' differ in signedness [-Wpointer-sign]
        &br
        ^~~
 In file included from ../src/cmd.h:8,
@@ -1269,38 +960,38 @@ In file included from ../src/cmd.h:8,
 ../src/fat/ff.h:309:9: note: expected 'UINT *' {aka 'unsigned int *'} but argument is of type 'int *'
  FRESULT f_read1 (FIL* fp, void* buff, UINT btr, UINT* br);   /* Read data from the file */
          ^~~~~~~
-../src/cmd.c:3621:4: warning: implicit declaration of function 'Internal_count' [-Wimplicit-function-declaration]
+../src/cmd.c:3615:4: warning: implicit declaration of function 'Internal_count' [-Wimplicit-function-declaration]
     Internal_count(&len,&Tx_time,&Tx_lastsize,&Tx_len);
     ^~~~~~~~~~~~~~
-../src/cmd.c:3647:10: warning: assignment to 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
+../src/cmd.c:3641:10: warning: assignment to 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
     buff_r=(void *)(0x90000000);
           ^
-../src/cmd.c:3551:27: warning: unused variable 'h' [-Wunused-variable]
+../src/cmd.c:3545:27: warning: unused variable 'h' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
                            ^
-../src/cmd.c:3551:16: warning: unused variable 'Status' [-Wunused-variable]
+../src/cmd.c:3545:16: warning: unused variable 'Status' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
                 ^~~~~~
-../src/cmd.c:3551:12: warning: unused variable 'x' [-Wunused-variable]
+../src/cmd.c:3545:12: warning: unused variable 'x' [-Wunused-variable]
     int i=0,x=0,Status,ret,h=0,time=1;
             ^
 ../src/cmd.c: In function 'run_cmd_d207':
-../src/cmd.c:3709:37: warning: operation on 'i' may be undefined [-Wsequence-point]
+../src/cmd.c:3703:37: warning: operation on 'i' may be undefined [-Wsequence-point]
          unicode_u16=(pMsg->MsgData[i++]|pMsg->MsgData[i++]<<8);
                                     ~^~
-../src/cmd.c:3705:7: warning: unused variable 'file' [-Wunused-variable]
+../src/cmd.c:3699:7: warning: unused variable 'file' [-Wunused-variable]
    FIL file;
        ^~~~
-../src/cmd.c:3700:17: warning: unused variable 'ret' [-Wunused-variable]
+../src/cmd.c:3694:17: warning: unused variable 'ret' [-Wunused-variable]
       int temp=0,ret=0,i=0,x=0,h=0;
                  ^~~
 ../src/cmd.c: In function 'run_cmd_f201':
-../src/cmd.c:3743:6: warning: implicit declaration of function 'cmd_reply_health_f201'; did you mean 'cmd_reply_a208'? [-Wimplicit-function-declaration]
+../src/cmd.c:3737:6: warning: implicit declaration of function 'cmd_reply_health_f201'; did you mean 'cmd_reply_a208'? [-Wimplicit-function-declaration]
   ret=cmd_reply_health_f201();
       ^~~~~~~~~~~~~~~~~~~~~
       cmd_reply_a208
 ../src/cmd.c: In function 'cmd_reply_health_f201':
-../src/cmd.c:3829:29: warning: passing argument 2 of 'XUartLite_Send' from incompatible pointer type [-Wincompatible-pointer-types]
+../src/cmd.c:3823:29: warning: passing argument 2 of 'XUartLite_Send' from incompatible pointer type [-Wincompatible-pointer-types]
    XUartLite_Send(&UartLite, &SendStructHealthStatus.RemainCap, 8);
                              ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 In file included from ../src/cmd.c:13:
@@ -1308,10 +999,10 @@ In file included from ../src/cmd.c:13:
  unsigned int XUartLite_Send(XUartLite *InstancePtr, u8 *DataBufferPtr,
                                                      ~~~~^~~~~~~~~~~~~
 ../src/cmd.c: At top level:
-../src/cmd.c:3834:6: warning: conflicting types for 'Internal_count'
+../src/cmd.c:3828:6: warning: conflicting types for 'Internal_count'
  void Internal_count(uint32_t *LEN,uint32_t *TIME,uint32_t *LastSize,uint32_t *Length)
       ^~~~~~~~~~~~~~
-../src/cmd.c:3621:4: note: previous implicit declaration of 'Internal_count' was here
+../src/cmd.c:3615:4: note: previous implicit declaration of 'Internal_count' was here
     Internal_count(&len,&Tx_time,&Tx_lastsize,&Tx_len);
     ^~~~~~~~~~~~~~
 ../src/cmd.c: In function 'cmd_parse':
@@ -1327,268 +1018,6 @@ In file included from ../src/cmd.c:13:
       ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 'Finished building: ../src/cmd.c'
 ' '
-'Building file: ../src/main.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/main.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/main.d" -MT"src/main.o" -o "src/main.o" "../src/main.c"
-In file included from ../src/cmd.h:4,
-                 from ../src/main.c:39:
-../../1249_bsp/microblaze_1/include/xbasic_types.h:120:2: warning: #warning The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert. [-Wcpp]
- #warning  The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert.
-  ^~~~~~~
-../../1249_bsp/microblaze_1/include/xbasic_types.h:121:2: warning: #warning Please refer the Standalone BSP UG647 for further details [-Wcpp]
- #warning  Please refer the Standalone BSP UG647 for further details
-  ^~~~~~~
-In file included from ../src/main.c:39:
-../src/cmd.h:228:1: warning: multi-line comment [-Wcomment]
- //#define SW16(x) ((uint16_t)((((uint16_t)(x)&0x00ffU)<<8) | \
- ^
-../src/main.c: In function 'main':
-../src/main.c:69:3: warning: implicit declaration of function 'MsgQueryInit' [-Wimplicit-function-declaration]
-   MsgQueryInit();
-   ^~~~~~~~~~~~
-../src/main.c:70:3: warning: implicit declaration of function 'SimpleTcpDmaInit' [-Wimplicit-function-declaration]
-   SimpleTcpDmaInit();
-   ^~~~~~~~~~~~~~~~
-../src/main.c:71:3: warning: implicit declaration of function 'Simple1xDmaInit' [-Wimplicit-function-declaration]
-   Simple1xDmaInit();
-   ^~~~~~~~~~~~~~~
-../src/main.c:72:3: warning: implicit declaration of function 'UartLiteIntr' [-Wimplicit-function-declaration]
-   UartLiteIntr();
-   ^~~~~~~~~~~~
-../src/main.c:159:3: warning: implicit declaration of function 'GetMessage'; did you mean 'setstate'? [-Wimplicit-function-declaration]
-   GetMessage(&CurMsg);
-   ^~~~~~~~~~
-   setstate
-../src/main.c:183:12: warning: implicit declaration of function 'run_cmd_a202'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-        ret=run_cmd_a202(&CurMsg);
-            ^~~~~~~~~~~~
-            run_cmd_a201
-../src/main.c:195:12: warning: implicit declaration of function 'run_cmd_a204'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-        ret=run_cmd_a204(&CurMsg);
-            ^~~~~~~~~~~~
-            run_cmd_a201
-../src/main.c:209:12: warning: implicit declaration of function 'run_cmd_a205'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-        ret=run_cmd_a205(&CurMsg);
-            ^~~~~~~~~~~~
-            run_cmd_a201
-../src/main.c:228:10: warning: implicit declaration of function 'run_cmd_b201'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-      ret=run_cmd_b201(&CurMsg);
-          ^~~~~~~~~~~~
-          run_cmd_a201
-../src/main.c:245:12: warning: implicit declaration of function 'run_cmd_d201'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-        ret=run_cmd_d201(&CurMsg);
-            ^~~~~~~~~~~~
-            run_cmd_a201
-../src/main.c:259:12: warning: implicit declaration of function 'run_cmd_d202'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-        ret=run_cmd_d202(&CurMsg);
-            ^~~~~~~~~~~~
-            run_cmd_a201
-../src/main.c:273:12: warning: implicit declaration of function 'run_cmd_d203'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-        ret=run_cmd_d203(&CurMsg);
-            ^~~~~~~~~~~~
-            run_cmd_a201
-../src/main.c:286:12: warning: implicit declaration of function 'run_cmd_d204'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-        ret=run_cmd_d204(&CurMsg);
-            ^~~~~~~~~~~~
-            run_cmd_a201
-../src/main.c:300:12: warning: implicit declaration of function 'run_cmd_d207'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-        ret=run_cmd_d207(&CurMsg);
-            ^~~~~~~~~~~~
-            run_cmd_a201
-../src/main.c:319:10: warning: implicit declaration of function 'run_cmd_f201'; did you mean 'run_cmd_a201'? [-Wimplicit-function-declaration]
-      ret=run_cmd_f201(&CurMsg);
-          ^~~~~~~~~~~~
-          run_cmd_a201
-../src/main.c:65:21: warning: unused variable 'i' [-Wunused-variable]
-   int ret,br=0,bw=0,i=0;
-                     ^
-../src/main.c:65:16: warning: unused variable 'bw' [-Wunused-variable]
-   int ret,br=0,bw=0,i=0;
-                ^~
-../src/main.c:65:11: warning: unused variable 'br' [-Wunused-variable]
-   int ret,br=0,bw=0,i=0;
-           ^~
-../src/main.c: In function 'write_data':
-../src/main.c:356:20: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
-   uint32_t  buff = (void *)(0x80000000);
-                    ^
-../src/main.c:351:7: warning: unused variable 'file_cmd' [-Wunused-variable]
-   u32 file_cmd=0;
-       ^~~~~~~~
-../src/main.c:350:21: warning: unused variable 'bw' [-Wunused-variable]
-   uint32_t Status=0,bw=0;
-                     ^~
-../src/main.c:350:12: warning: unused variable 'Status' [-Wunused-variable]
-   uint32_t Status=0,bw=0;
-            ^~~~~~
-../src/main.c:349:7: warning: unused variable 'k' [-Wunused-variable]
-   int k=0;
-       ^
-../src/main.c:348:7: warning: unused variable 'unicode_u16' [-Wunused-variable]
-   u16 unicode_u16=0;
-       ^~~~~~~~~~~
-../src/main.c:347:26: warning: unused variable 'h' [-Wunused-variable]
-   uint32_t ret=0,i=0,x=0,h=0;
-                          ^
-../src/main.c:347:22: warning: unused variable 'x' [-Wunused-variable]
-   uint32_t ret=0,i=0,x=0,h=0;
-                      ^
-../src/main.c:347:12: warning: unused variable 'ret' [-Wunused-variable]
-   uint32_t ret=0,i=0,x=0,h=0;
-            ^~~
-../src/main.c: In function 'read_data':
-../src/main.c:467:20: warning: initialization of 'uint32_t' {aka 'long unsigned int'} from 'void *' makes integer from pointer without a cast [-Wint-conversion]
-   uint32_t  buff_r=(void *)(0x80000000);
-                    ^
-../src/main.c:472:8: warning: implicit declaration of function 'io_read3'; did you mean 'io_read2'? [-Wimplicit-function-declaration]
-     if(io_read3(NHC_NUM, 0x1, buff_r, slba_r, len, 0x0) != 0x02)
-        ^~~~~~~~
-        io_read2
-../src/main.c:463:7: warning: unused variable 'br' [-Wunused-variable]
-   int br;
-       ^~
-../src/main.c:460:22: warning: unused variable 'h' [-Wunused-variable]
-   int i=0,Status,ret,h=0;
-                      ^
-../src/main.c:460:11: warning: unused variable 'Status' [-Wunused-variable]
-   int i=0,Status,ret,h=0;
-           ^~~~~~
-'Finished building: ../src/main.c'
-' '
-'Building file: ../src/mem_test.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/mem_test.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/mem_test.d" -MT"src/mem_test.o" -o "src/mem_test.o" "../src/mem_test.c"
-'Finished building: ../src/mem_test.c'
-' '
-'Building file: ../src/nhc_amba.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/nhc_amba.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/nhc_amba.d" -MT"src/nhc_amba.o" -o "src/nhc_amba.o" "../src/nhc_amba.c"
-../src/nhc_amba.c: In function 'io_write2':
-../src/nhc_amba.c:857:11: warning: unused variable 'slba_1' [-Wunused-variable]
-  uint64_t slba_1=0;
-           ^~~~~~
-../src/nhc_amba.c:856:18: warning: unused variable 'full_wr_cnt' [-Wunused-variable]
-  static uint32_t full_wr_cnt = 0;
-                  ^~~~~~~~~~~
-../src/nhc_amba.c:855:13: warning: unused variable 'j' [-Wunused-variable]
-  uint8_t  i,j;
-             ^
-../src/nhc_amba.c: In function 'io_write3':
-../src/nhc_amba.c:954:18: warning: unused variable 'full_wr_cnt' [-Wunused-variable]
-  static uint32_t full_wr_cnt = 0;
-                  ^~~~~~~~~~~
-../src/nhc_amba.c:953:13: warning: unused variable 'j' [-Wunused-variable]
-  uint8_t  i,j;
-             ^
-../src/nhc_amba.c: In function 'io_read2':
-../src/nhc_amba.c:1049:18: warning: unused variable 'full_rd_cnt' [-Wunused-variable]
-  static uint32_t full_rd_cnt = 0;
-                  ^~~~~~~~~~~
-../src/nhc_amba.c:1048:13: warning: unused variable 'j' [-Wunused-variable]
-  uint8_t  i,j;
-             ^
-../src/nhc_amba.c: In function 'io_read3':
-../src/nhc_amba.c:1158:13: warning: unused variable 'j' [-Wunused-variable]
-  uint8_t  i,j;
-             ^
-../src/nhc_amba.c: In function 'io_read4':
-../src/nhc_amba.c:1254:18: warning: unused variable 'full_rd_cnt' [-Wunused-variable]
-  static uint32_t full_rd_cnt = 0;
-                  ^~~~~~~~~~~
-../src/nhc_amba.c:1253:13: warning: unused variable 'j' [-Wunused-variable]
-  uint8_t  i,j;
-             ^
-../src/nhc_amba.c: In function 'send_axis_ack_1':
-../src/nhc_amba.c:1544:2: warning: implicit declaration of function 'TxSend_1'; did you mean 'TxSend'? [-Wimplicit-function-declaration]
-  TxSend_1(SourceBuffer,8);
-  ^~~~~~~~
-  TxSend
-At top level:
-../src/nhc_amba.c:1254:18: warning: 'full_rd_cnt' defined but not used [-Wunused-variable]
-  static uint32_t full_rd_cnt = 0;
-                  ^~~~~~~~~~~
-../src/nhc_amba.c:1049:18: warning: 'full_rd_cnt' defined but not used [-Wunused-variable]
-  static uint32_t full_rd_cnt = 0;
-                  ^~~~~~~~~~~
-../src/nhc_amba.c:954:18: warning: 'full_wr_cnt' defined but not used [-Wunused-variable]
-  static uint32_t full_wr_cnt = 0;
-                  ^~~~~~~~~~~
-../src/nhc_amba.c:856:18: warning: 'full_wr_cnt' defined but not used [-Wunused-variable]
-  static uint32_t full_wr_cnt = 0;
-                  ^~~~~~~~~~~
-'Finished building: ../src/nhc_amba.c'
-' '
-'Building file: ../src/platform.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/platform.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/platform.d" -MT"src/platform.o" -o "src/platform.o" "../src/platform.c"
-'Finished building: ../src/platform.c'
-' '
-'Building file: ../src/simple_dma.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/simple_dma.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/simple_dma.d" -MT"src/simple_dma.o" -o "src/simple_dma.o" "../src/simple_dma.c"
-In file included from ../src/cmd.h:4,
-                 from ../src/simple_dma.c:1:
-../../1249_bsp/microblaze_1/include/xbasic_types.h:120:2: warning: #warning The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert. [-Wcpp]
- #warning  The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert.
-  ^~~~~~~
-../../1249_bsp/microblaze_1/include/xbasic_types.h:121:2: warning: #warning Please refer the Standalone BSP UG647 for further details [-Wcpp]
- #warning  Please refer the Standalone BSP UG647 for further details
-  ^~~~~~~
-In file included from ../src/simple_dma.c:1:
-../src/cmd.h:228:1: warning: multi-line comment [-Wcomment]
- //#define SW16(x) ((uint16_t)((((uint16_t)(x)&0x00ffU)<<8) | \
- ^
-../src/simple_dma.c: In function 'RxIntrHandler':
-../src/simple_dma.c:366:2: warning: implicit declaration of function 'cmd_parse' [-Wimplicit-function-declaration]
-  cmd_parse();//parse recv cmd from uper   //wfeng
-  ^~~~~~~~~
-In file included from ../src/cmd.h:10,
-                 from ../src/simple_dma.c:1:
-../../1249_bsp/microblaze_1/include/xstatus.h:61:41: warning: 'return' with a value, in function returning void
- #define XST_FAILURE                     1L
-                                         ^~
-../src/simple_dma.c:374:10: note: in expansion of macro 'XST_FAILURE'
-   return XST_FAILURE;
-          ^~~~~~~~~~~
-../src/simple_dma.c:313:6: note: declared here
- void RxIntrHandler(void *Callback)
-      ^~~~~~~~~~~~~
-In file included from ../src/cmd.h:10,
-                 from ../src/simple_dma.c:1:
-../src/simple_dma.c: In function 'RxIntrHandler1':
-../../1249_bsp/microblaze_1/include/xstatus.h:61:41: warning: 'return' with a value, in function returning void
- #define XST_FAILURE                     1L
-                                         ^~
-../src/simple_dma.c:440:10: note: in expansion of macro 'XST_FAILURE'
-   return XST_FAILURE;
-          ^~~~~~~~~~~
-../src/simple_dma.c:379:6: note: declared here
- void RxIntrHandler1(void *Callback)
-      ^~~~~~~~~~~~~~
-'Finished building: ../src/simple_dma.c'
-' '
-'Building file: ../src/stm32uart_intr.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/stm32uart_intr.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/stm32uart_intr.d" -MT"src/stm32uart_intr.o" -o "src/stm32uart_intr.o" "../src/stm32uart_intr.c"
-In file included from ../src/cmd.h:4,
-                 from ../src/stm32uart_intr.c:65:
-../../1249_bsp/microblaze_1/include/xbasic_types.h:120:2: warning: #warning The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert. [-Wcpp]
- #warning  The xbasics_type.h file is deprecated and users should use xil_types.h and xil_assert.
-  ^~~~~~~
-../../1249_bsp/microblaze_1/include/xbasic_types.h:121:2: warning: #warning Please refer the Standalone BSP UG647 for further details [-Wcpp]
- #warning  Please refer the Standalone BSP UG647 for further details
-  ^~~~~~~
-In file included from ../src/stm32uart_intr.c:65:
-../src/cmd.h:228:1: warning: multi-line comment [-Wcomment]
- //#define SW16(x) ((uint16_t)((((uint16_t)(x)&0x00ffU)<<8) | \
- ^
-'Finished building: ../src/stm32uart_intr.c'
-' '
-'Building file: ../src/xllfifo_polling_example.c'
-'Invoking: MicroBlaze gcc compiler'
-mb-gcc -Wall -O0 -g3 -c -fmessage-length=0 -MT"src/xllfifo_polling_example.o" -I../../1249_bsp/microblaze_1/include -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -ffunction-sections -fdata-sections -MMD -MP -MF"src/xllfifo_polling_example.d" -MT"src/xllfifo_polling_example.o" -o "src/xllfifo_polling_example.o" "../src/xllfifo_polling_example.c"
-'Finished building: ../src/xllfifo_polling_example.c'
-' '
 'Building target: 1249.elf'
 'Invoking: MicroBlaze gcc linker'
 mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../1249_bsp/microblaze_1/lib -mlittle-endian -mxl-barrel-shift -mxl-pattern-compare -mno-xl-soft-div -mcpu=v11.0 -mno-xl-soft-mul -mxl-multiply-high -mhard-float -mxl-float-convert -mxl-float-sqrt -Wl,--no-relax -Wl,--gc-sections -o "1249.elf"  ./src/fat/diskio.o ./src/fat/ff.o ./src/fat/ffsystem.o ./src/fat/ffunicode.o  ./src/FIFO.o ./src/alloc.o ./src/cmd.o ./src/main.o ./src/mem_test.o ./src/nhc_amba.o ./src/platform.o ./src/ring_buffer.o ./src/simple_dma.o ./src/stm32uart_intr.o ./src/xllfifo_polling_example.o   -Wl,--start-group,-lxil,-lgcc,-lc,--end-group
@@ -1597,9 +1026,9 @@ mb-gcc -Wl,-T -Wl,../src/lscript.ld -L../../1249_bsp/microblaze_1/lib -mlittle-e
 'Invoking: MicroBlaze Print Size'
 mb-size 1249.elf  |tee "1249.elf.size"
    text	   data	    bss	    dec	    hex	filename
- 407808	   1996	14828828	15238632	 e885e8	1249.elf
+ 407928	   1996	14828828	15238752	 e88660	1249.elf
 'Finished building: 1249.elf.size'
 ' '
 
-11:22:40 Build Finished (took 3s.857ms)
+09:16:51 Build Finished (took 1s.181ms)
 

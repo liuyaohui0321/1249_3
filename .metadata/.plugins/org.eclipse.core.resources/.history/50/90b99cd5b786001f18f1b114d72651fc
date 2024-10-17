@@ -259,12 +259,12 @@ void cmd_type_id_parse(StructMsg *pMsg)
 //								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
 //							}
 						break;
-						case 0x3:
-							for(i=0; i < TMsg.DataLen; i++)
-							{
-								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
-							}
-						break;
+//						case 0x3:
+//							for(i=0; i < TMsg.DataLen; i++)
+//							{
+//								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
+//							}
+//						break;
 						case 0x4:
 							for(i=0; i < TMsg.DataLen; i++)
 							{
@@ -2551,6 +2551,12 @@ int run_cmd_d202(StructMsg *pMsg)
 			if (cmd_str_1[x] == '\0')  break;
 		}
 		i=temp+2048;
+//		f_getfree("", &Free_Clust, &fs);
+//		if(Free_Clust<9)
+//		{
+//			xil_printf("have no storge space!Free_Clust:%u\r\n,",Free_Clust);
+//			return 1;
+//		}
 
 #if     1	//覆盖写入
 		ret = f_open(&wfile,cmd_str_11, FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
@@ -2671,8 +2677,8 @@ int run_cmd_d203(StructMsg *pMsg)
 
 #if   10	//覆盖写入
 		// 获取并解析从DMA0传过来的文件路径
-		ret = f_open(&wfile,cmd_str_11, FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
-//		ret = f_open(&wfile,"G", FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
+//		ret = f_open(&wfile,cmd_str_11, FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
+		ret = f_open(&wfile,"G", FA_CREATE_ALWAYS | FA_WRITE |FA_READ);
 		if (ret != FR_OK)
 		{
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
@@ -3117,8 +3123,8 @@ int run_cmd_d205_8x(BYTE* name)
 	  uint32_t  buff_r=(void *)(0x80000000);
 
 	  xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
-	  ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ|FA_WRITE);
-//	  ret = f_open(&rfile,"G", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
+//	  ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
+	  ret = f_open(&rfile,"G", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
 	  if (ret != FR_OK)
 	  {
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
@@ -3270,7 +3276,7 @@ int run_cmd_d205_2_8x(BYTE* name,int read_time)
 	 int Reread_time=0;
 	 xil_printf("%s %d  %s\r\n", __FUNCTION__, __LINE__,name);
 
-	 ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ|FA_WRITE);
+	 ret = f_open(&rfile,name, FA_OPEN_EXISTING |FA_READ);
 //	 ret = f_open(&rfile,"D", FA_OPEN_EXISTING |FA_READ|FA_WRITE);
 	 if (ret != FR_OK)
 	 {
@@ -3433,8 +3439,8 @@ int run_cmd_d204(StructMsg *pMsg)
 	i+=4;
 	x0=(((Read_mode>>0)&0x1)==1)?1:0;     //x0=1为流式读取,x0=0为分包读取
 
-	x1=(((Read_mode>>4)&0xf)==0)?0:		//x1=0为通过网口回传读数据,x1=1为通过GTH 1x回传数据,x1=2为通过GTH 8x回传数据
-				(((Read_mode>>4)&0xf)==1)?1:2;
+	x1=(((Read_mode>>4)&0x1)==0)?0:		//x1=0为通过网口回传读数据,x1=1为通过GTH 1x回传数据,x1=2为通过GTH 8x回传数据
+				(((Read_mode>>4)&0x1)==1)?1:2;
 	x2=(((Read_mode>>8)&0x1)==1)?1:0;		//x2=0为一次读完 x2=1为循环回读
 	Read_time=CW32(pMsg->MsgData[i+0],pMsg->MsgData[i+1],pMsg->MsgData[i+2],pMsg->MsgData[i+3]);
 
@@ -3462,8 +3468,8 @@ int run_cmd_d204(StructMsg *pMsg)
 				break;
 
 				case 0x1:
-					run_cmd_d205_2(cmd_str_11,Read_time,x1);
-//					run_cmd_d205_2_8x(cmd_str_11,Read_time);
+//					run_cmd_d205_2(cmd_str_11,Read_time,x1);
+					run_cmd_d205_2_8x(cmd_str_11,Read_time);
 				break;
 
 				default:
