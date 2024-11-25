@@ -38,6 +38,9 @@ extern FIL rfile;
 extern uint8_t flag_tcp;
 extern uint8_t flag_1x;
 extern XUartLite UartLite;
+extern uint64_t REMAIN_SPACE;
+extern QWORD  LOSS;
+extern QWORD  TOTAL_CAP;
 uint32_t write_len=0;
 
 DIR dir;
@@ -54,6 +57,7 @@ int Read_Packet_Size=0x10000000;
 int Read_Packet_Size1=0x10000000;
 //uint8_t HasCreat=0;
 uint8_t Stop_read=0;
+uint8_t Stop_write=0;
 //extern struct message_struct fifodata;
 //extern int a;
 /**********************FIFO有关参数设置*************************/
@@ -271,12 +275,13 @@ void cmd_type_id_parse(StructMsg *pMsg)
 								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
 							}
 						break;
-//						case 0x5:
+						case 0x5:
 //							for(i=0; i < TMsg.DataLen; i++)
 //							{
 //								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
 //							}
-//						break;
+							Stop_write=1;
+						break;
 						case 0x6:
 							for(i=0; i < TMsg.DataLen; i++)
 							{
@@ -791,10 +796,12 @@ int run_cmd_a201(StructMsg *pMsg)
 					wlen=lastpack_Size;
 				}
 				if(COUNT==upload_time)  break;
-				usleep(100);
+				//usleep(100);
+				usleep(10000);
 			}
 			xil_printf("%s %d  write_len=%d\r\n", __FUNCTION__, __LINE__,write_len);
 			write_len=0;
+			Reply_REMAIN_SPACE();
 		break;
 
 		default:
@@ -2285,7 +2292,7 @@ int cmd_reply_a208(BYTE* path)
 		Status = Num_of_Dir_and_File(path,&TotalFileNum,&TotaldirNum,0);
 		if (Status != FR_OK) {
 			xil_printf("Count Failed! ret=%d\r\n",Status);
-			return -1;
+//			return -1;
 		}
 		ReplyStructA208Ack.FileNum=TotalFileNum; //文件总个数
 		ReplyStructA208Ack.DirNum=TotaldirNum;   //文件夹总个数
@@ -2585,6 +2592,11 @@ int run_cmd_d202(StructMsg *pMsg)
 					}
 					break;
 				}
+				if(len>=REMAIN_SPACE)
+				{
+					xil_printf("Have no space!\r\n");
+					return -1;
+				}
 				ret = f_write1(
 					&wfile,			/* Open file to be written */
 					buff,			/* Data to be written */
@@ -2598,6 +2610,7 @@ int run_cmd_d202(StructMsg *pMsg)
 					 return ret;
 				}
 				cmd_write_cnt += 1;
+				REMAIN_SPACE-=len;
 //				xil_printf("buff:0x%lx  len:0x%lx\r\n",buff,len);
 			}
 			else
@@ -2761,6 +2774,11 @@ int run_cmd_d203(StructMsg *pMsg)
 //					break;
 //				}
 //				FLAG=1;
+				if(len>=REMAIN_SPACE)
+				{
+					xil_printf("Have no space!\r\n");
+					return -1;
+				}
 				ret = f_write1(
 					&wfile,			/* Open file to be written */
 					buff,			/* Data to be written */
@@ -2774,6 +2792,7 @@ int run_cmd_d203(StructMsg *pMsg)
 					 return ret;
 				}
 				cmd_write_cnt += 1;
+				REMAIN_SPACE-=len;
 //				xil_printf("write_cnt:%u \r\n",cmd_write_cnt);
 			}
 			else
@@ -2794,6 +2813,12 @@ int run_cmd_d203(StructMsg *pMsg)
 						sts = nhc_cmd_sts(i);
 					}while(sts == 0x01);
 				}
+			}
+//			if(flag_tcp==1)  break;
+			if(Stop_write==1)
+			{
+				Stop_write=0;
+				break;    
 			}
 		 }   // while
 		 ret=f_close(&wfile);
@@ -2937,6 +2962,11 @@ int run_cmd_d205(BYTE* name,uint8_t mode)
 						}
 					}
 					break;
+			}
+			if(Stop_read==1)     
+			{
+				Stop_read=0;
+				break;    
 			}
 
 	 }  //while
@@ -3245,6 +3275,11 @@ int run_cmd_d205_8x(BYTE* name)
 						}
 					}
 					break;
+			}
+			if(Stop_read==1)     //读取到取消回读的标志
+			{
+				Stop_read=0;
+				break;    //终止回读
 			}
 
 	 }  //while
@@ -3850,4 +3885,11 @@ void Internal_count(uint32_t *LEN,uint32_t *TIME,uint32_t *LastSize,uint32_t *Le
 	  *TIME=time;
 	  *LastSize=lastSize;
 	  *Length=length;
+}
+void Reply_REMAIN_SPACE(void)
+{
+	uint64_t used_Cap=0;
+	REMAIN_SPACE=0;
+	get_Dir_size("0:",&used_Cap);
+	REMAIN_SPACE= TOTAL_CAP-used_Cap-LOSS;
 }

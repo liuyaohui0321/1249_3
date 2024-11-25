@@ -26,6 +26,8 @@
 #define MAX_PATHNAME_DEPTH  512+1 //
 static UINT bw=0;
 static UINT br=0;
+QWORD  LOSS=1821855814452;
+QWORD  TOTAL_CAP = 6000000000000;
 /*--------------------------------------------------------------------------
 
    Module Private Definitions
@@ -1744,8 +1746,10 @@ static FRESULT dir_clear (	/* Returns FR_OK or FR_DISK_ERR */
 #endif
 	{
 		ibuf = fs->win; szb = 1;	/* Use window buffer (many single-sector writes may take a time) */
-		for (n = 0; n < fs->csize && disk_write1(fs->pdrv, (BYTE *)(0xA0001000), sect + n, szb) == RES_OK; n += szb) ;	/* Fill the cluster with 0 *///9.3
 		memcpy((BYTE *)(0xA0001000),ibuf,SECTORSIZE*szb);
+		for (n = 0; n < fs->csize && disk_write1(fs->pdrv, (BYTE *)(0xA0001000), sect + n, szb) == RES_OK; n += szb) ;	/* Fill the cluster with 0 *///9.3
+//		memcpy((BYTE *)(0xA0001000),ibuf,SECTORSIZE*szb);
+		memset((BYTE *)(0xA0001000),0,SECTORSIZE*szb);
 	}
 	return (n == fs->csize) ? FR_OK : FR_DISK_ERR;
 }
@@ -7803,7 +7807,8 @@ FRESULT record_struct_of_Dir_and_File(BYTE *path,LinkedList LinkList)
 	DIR dir;
 	UINT i;
 	static FILINFO fno;
-	char filename[1024]={0};
+	//char filename[1024]={0};
+	char filename[256]={0};
 	Node node;
 
 	res = f_opendir(&dir, path);                       /* Open the directory */
@@ -7956,7 +7961,7 @@ FRESULT Num_of_Dir_and_File (BYTE *path,DWORD *file_num,DWORD *dir_num,uint8_t m
 {
     FRESULT res;
     DIR dir;
-    FILINFO fno;
+    static FILINFO fno;
     int i=0;
 
     res = f_opendir(&dir, path);                       /* Open the directory */
@@ -8016,30 +8021,33 @@ FRESULT Storage_state1(QWORD* totalcap,QWORD* usedcap,QWORD* freecap,DWORD* file
 	 int file_num=0,dir_num=0;
 	 QWORD free_clust=0, Free_Cap=0, Total_Cap=0,Used_Cap=0;
 	 f_getfree("", &free_clust, &fs);
-	 xil_printf("fs->n_fatent=%u\r\n", fs->n_fatent);
-
-//	 Total_Cap = (QWORD)((fs->n_fatent - 2) * fs->csize * 4096);
-//	 Total_Cap = (((QWORD)(fs->n_fatent)) - 2 )* fs->csize * 4096*2;     // B
-	 Total_Cap = (((QWORD)(fs->n_fatent)) - 2 )* fs->csize * 4096;     // B
-	 xil_printf("Total_Cap=%llu\r\n", Total_Cap);
-
-	 Free_Cap = free_clust * fs->csize*4096;             			// B
-	 xil_printf("Free_Cap=%llu\r\n", Free_Cap);
-
-	 Used_Cap = Total_Cap-Free_Cap;                    				// B
-	 xil_printf("Used_Cap=%llu\r\n", Used_Cap);
+//	 xil_printf("fs->n_fatent=%u\r\n", fs->n_fatent);
+//
+////	 Total_Cap = (QWORD)((fs->n_fatent - 2) * fs->csize * 4096);
+////	 Total_Cap = (((QWORD)(fs->n_fatent)) - 2 )* fs->csize * 4096*2;     // B
+//	 Total_Cap = (((QWORD)(fs->n_fatent)) - 2 )* fs->csize * 4096;     // B
+//	 xil_printf("Total_Cap=%llu\r\n", Total_Cap);
+//
+//	 Free_Cap = free_clust * fs->csize*4096;             			// B
+//	 xil_printf("Free_Cap=%llu\r\n", Free_Cap);
+//
+//	 Used_Cap = Total_Cap-Free_Cap;                    				// B
+//	 xil_printf("Used_Cap=%llu\r\n", Used_Cap);
 
 	 res=Num_of_Dir_and_File ("",&file_num,&dir_num,0);
 	 if (res != FR_OK)
 	 {
 	 	  xil_printf("file_num get Failed! ret=%d\r\n", res);
-	 	  return -1;
+//	 	  return -1;
 	 }
+	Total_Cap = TOTAL_CAP;
+	 get_Dir_size("0:",&Used_Cap);
+	 Free_Cap= Total_Cap-Used_Cap-LOSS;
 	 *totalcap=Total_Cap;
 	 *usedcap=Used_Cap;
 	 *freecap=Free_Cap;
 	 *filenum=file_num+dir_num;
-	 xil_printf("Total_Cap=%llu  Free_Cap=%llu   Used_Cap=%llu    \r\n", Total_Cap,Free_Cap,Used_Cap);
+//	 xil_printf("Total_Cap=%llu  Free_Cap=%llu   Used_Cap=%llu    \r\n", Total_Cap,Free_Cap,Used_Cap);
      return FR_OK;
 }
 
