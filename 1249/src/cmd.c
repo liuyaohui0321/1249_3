@@ -779,12 +779,14 @@ int run_cmd_a201(StructMsg *pMsg)
 				}
 				else if(flag_tcp==1)
 				{
+					while(FALSE!=XAxiDma_Busy(&AxiDma1, XAXIDMA_DMA_TO_DEVICE));//12.16 add by lyh
 					AxiDma1.TxBdRing.HasDRE=1;
 					ret = XAxiDma_SimpleTransfer(&AxiDma1,(UINTPTR *)(databuf),
 							wlen, XAXIDMA_DMA_TO_DEVICE);
 
 					if (ret != XST_SUCCESS)
 					{
+						xil_printf("%s %d ret:%d\r\n", __FUNCTION__, __LINE__,ret);
 						return XST_FAILURE;
 					}
 //					xil_printf("ret=%d\r\n", ret);
@@ -797,7 +799,8 @@ int run_cmd_a201(StructMsg *pMsg)
 				}
 				if(COUNT==upload_time)  break;
 				//usleep(100);
-				usleep(10000);
+				usleep(50000);				
+				//usleep(10000);
 			}
 			xil_printf("%s %d  write_len=%d\r\n", __FUNCTION__, __LINE__,write_len);
 			write_len=0;
