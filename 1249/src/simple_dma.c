@@ -588,12 +588,16 @@ int SetupIntrSystem(INTC * IntcInstancePtr,
 #ifdef XPAR_INTC_0_DEVICE_ID
 
 	/* Initialize the interrupt controller and connect the ISRs */
-	Status = XIntc_Initialize(IntcInstancePtr, INTC_DEVICE_ID);
-	if (Status != XST_SUCCESS) {
+	do
+	{
+		Status = XIntc_Initialize(IntcInstancePtr, INTC_DEVICE_ID);
+		if (Status != XST_SUCCESS) {
 
-		xil_printf("Failed init intc\r\n");
-		return XST_FAILURE;
-	}
+			xil_printf("Failed init intc\r\n");
+			return XST_FAILURE;
+		}
+		usleep(100000);
+	} while(Status != XST_SUCCESS);
 
 	Status = XIntc_Connect(IntcInstancePtr, TxIntrId,
 			       (XInterruptHandler) TxIntrHandler1, AxiDmaPtr);

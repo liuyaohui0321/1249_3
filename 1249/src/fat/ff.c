@@ -26,7 +26,7 @@
 #define MAX_PATHNAME_DEPTH  512+1 //
 static UINT bw=0;
 static UINT br=0;
-QWORD  LOSS=1821855814452;
+QWORD  LOSS=1881855814452;//12.19 改 by lyh
 QWORD  TOTAL_CAP = 6000000000000;
 /*--------------------------------------------------------------------------
 

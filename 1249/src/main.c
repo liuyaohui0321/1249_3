@@ -46,7 +46,8 @@ extern uint8_t flag_tcp;
 uint8_t sts=0;
 //uint8_t FLAG=0;
 extern uint8_t rxflag;
-#define CLEAN_PARAM   do{flag_1x=0;flag_tcp=0;}while(0)
+extern uint8_t Stop_write;
+#define CLEAN_PARAM   do{flag_1x=0;flag_tcp=0;Stop_write=0;}while(0)
 
 uint64_t file_cap=0;
 u32 DestinationBuffer[MAX_DATA_BUFFER_SIZE * WORD_SIZE];
@@ -59,6 +60,7 @@ FILINFO fno;
 FIL file;
 FIL wfile;
 FIL rfile;
+uint64_t REMAIN_SPACE=0;
 /************************************************************/
 int main()
 {

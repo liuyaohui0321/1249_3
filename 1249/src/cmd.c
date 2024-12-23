@@ -1260,6 +1260,52 @@ int cmd_reply_a204(u32 packnum, u32 type, u32 id, u32 result)
 		return 0;
 }
 
+int cmd_reply_AcqusionRet(u32 ID,u32 result,u32 mode)
+{
+		int Status;
+		StructAcqusionRet ReplyRetStruct;
+//		xil_printf("%s %d\r\n", __FUNCTION__, __LINE__);
+		ReplyRetStruct.Head = 0x55555555;
+		ReplyRetStruct.SrcId = SRC_ID;
+		ReplyRetStruct.DestId = DEST_ID;
+		ReplyRetStruct.HandType = SW32(0xC2);
+		ReplyRetStruct.HandId = SW32(ID);
+		ReplyRetStruct.PackNum = 0;
+		ReplyRetStruct.AckStateRet = SW32(result);
+		ReplyRetStruct.mode = SW32(mode);
+		for(int i=0;i<6;i++)
+		{
+			ReplyRetStruct.backups[i] = 0x0;
+		}
+		ReplyRetStruct.CheckCode = 0x0;
+		ReplyRetStruct.Tail = 0xAAAAAAAA;
+
+		if(flag_1x==1)
+		{
+			AxiDma.TxBdRing.HasDRE=1;
+			Status = XAxiDma_SimpleTransfer(&AxiDma,(UINTPTR)&ReplyRetStruct,
+					sizeof(StructAcqusionRet), XAXIDMA_DMA_TO_DEVICE);
+
+			if (Status != XST_SUCCESS)
+			{
+				return XST_FAILURE;
+			}
+//			flag_1x=0;
+		}
+		else if(flag_tcp==1)
+		{
+			AxiDma1.TxBdRing.HasDRE=1;
+			Status = XAxiDma_SimpleTransfer(&AxiDma1,(UINTPTR)&ReplyRetStruct,
+					sizeof(StructAcqusionRet), XAXIDMA_DMA_TO_DEVICE);
+
+			if (Status != XST_SUCCESS)
+			{
+				return XST_FAILURE;
+			}
+//			flag_tcp=0;
+		}
+		return XST_SUCCESS;
+}
 //int run_cmd_a204(StructMsg *pMsg)   //增加了协议内容
 //{
 //	    int ret=0,i=0,x=0,temp=0,h=0;
@@ -2598,7 +2644,8 @@ int run_cmd_d202(StructMsg *pMsg)
 				if(len>=REMAIN_SPACE)
 				{
 					xil_printf("Have no space!\r\n");
-					return -1;
+//					return -1;
+					break;
 				}
 				ret = f_write1(
 					&wfile,			/* Open file to be written */
@@ -2657,7 +2704,6 @@ int run_cmd_d203(StructMsg *pMsg)
 {
 		uint32_t ret=0,i=0,x=0,h=0;
 		u16 unicode_u16=0;
-		int k=0;
 		uint32_t Status=0,bw=0;
 		u32 file_cmd=0;
 		uint8_t sts;
@@ -2692,11 +2738,22 @@ int run_cmd_d203(StructMsg *pMsg)
 		if (ret != FR_OK)
 		{
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
-			//cmd_reply_a203_to_a201(pMsg->PackNum,pMsg->HandType,pMsg->HandId,0x10);  // lyh 2023.8.15
+			ret = cmd_reply_AcqusionRet(0x01,0x10,0x0);//接收到开始采集指令，但是准备开始采集的状态有问题，导致无法接收采集数据，需要给上位机回一个失败的状态。
+			if (ret != FR_OK)
+			{
+				xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+				return ret;
+			}
 			return ret;
 		}
 
 		xil_printf("Waiting FPGA Vio Ctrl Read Write Start\r\n");
+		ret = cmd_reply_AcqusionRet(0x01,0x11,0x0);//接收到开始采集指令，且已经准备好开始采集。
+		if (ret != FR_OK)
+		{
+			xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+			return ret;
+		}
 #endif
 
 #if   0    //不覆盖写入
@@ -2779,8 +2836,15 @@ int run_cmd_d203(StructMsg *pMsg)
 //				FLAG=1;
 				if(len>=REMAIN_SPACE)
 				{
-					xil_printf("Have no space!\r\n");
-					return -1;
+					xil_printf("Have no space! Stop to write!\r\n");
+//					return -1;
+					ret = cmd_reply_AcqusionRet(0x02,0x11,0x1);//异常退出，需要停止采集。
+					if (ret != FR_OK)
+					{
+						xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+						return ret;
+					}
+					break;
 				}
 				ret = f_write1(
 					&wfile,			/* Open file to be written */
@@ -2792,6 +2856,13 @@ int run_cmd_d203(StructMsg *pMsg)
 				{
 					 xil_printf(" f_write Failed! %d\r\n",ret);
 					 f_close(&wfile);
+					 usleep(100000);
+					 Status = cmd_reply_AcqusionRet(0x02,0x11,0x1);//异常退出，需要停止采集。
+					 if (Status != FR_OK)
+					 {
+						xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", Status);
+						return Status;
+					 }
 					 return ret;
 				}
 				cmd_write_cnt += 1;
@@ -2821,6 +2892,13 @@ int run_cmd_d203(StructMsg *pMsg)
 			if(Stop_write==1)
 			{
 				Stop_write=0;
+				xil_printf("Stop write!\r\n");
+				ret = cmd_reply_AcqusionRet(0x02,0x11,0x0);//接收到停止采集指令，且已经准备好停止采集。
+				if (ret != FR_OK)
+				{
+					xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+					return ret;
+				}
 				break;    
 			}
 		 }   // while
@@ -2868,8 +2946,19 @@ int run_cmd_d205(BYTE* name,uint8_t mode)
 	  if (ret != FR_OK)
 	  {
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
-			//cmd_reply_a203_to_a201(pMsg->PackNum,pMsg->HandType,pMsg->HandId,0x10);  // lyh 2023.8.15
+ret = cmd_reply_AcqusionRet(0x03,0x10,0x0);//接收到开始回放指令，但是没有准备好开始回放。
+		    if (ret != FR_OK)
+		    {
+			    xil_printf("reply  Acqusion_Result Failed! ret=%d\r\n", ret);
+			    return ret;
+		    }
 			return ret;
+	  }
+	  ret = cmd_reply_AcqusionRet(0x03,0x11,0x0);//接收到开始回放指令，但是没有准备好开始回放。
+	  if (ret != FR_OK)
+	  {
+		  xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+		  return ret;
 	  }
 	  size=((f_size(&rfile)%4)==0?f_size(&rfile):(f_size(&rfile)/4+1)*4);
 	  len=size;
@@ -2908,6 +2997,13 @@ int run_cmd_d205(BYTE* name,uint8_t mode)
 			if (ret != FR_OK)
 			{
 					xil_printf("f_read Failed! ret=%d\r\n", ret);
+					usleep(100000);
+					ret = cmd_reply_AcqusionRet(0x04,0x11,0x1);//接收到停止回放指令，且已经准备好停止回放。
+					if (ret != FR_OK)
+					{
+						xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+						return ret;
+					}
 					return ret;
 			}
 			r_count++;
@@ -2979,6 +3075,13 @@ int run_cmd_d205(BYTE* name,uint8_t mode)
 		 xil_printf(" f_close Failed! %d\r\n",ret);
 		 return ret;
 	 }
+	 usleep(100000);
+	 ret = cmd_reply_AcqusionRet(0x04,0x11,0x1);//接收到停止回放指令，且已经准备好停止回放。
+	 if (ret != FR_OK)
+	 {
+		 xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+		 return ret;
+	 }
 	 return 0;
 }
 
@@ -3016,8 +3119,19 @@ int run_cmd_d205_2(BYTE* name,int read_time,uint8_t mode)
 	 if (ret != FR_OK)
 	 {
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
-			//cmd_reply_a203_to_a201(pMsg->PackNum,pMsg->HandType,pMsg->HandId,0x10);  // lyh 2023.8.15
+			ret = cmd_reply_AcqusionRet(0x03,0x10,0x0);//接收到开始回放指令，但是没准备好开始回放。
+		    if (ret != FR_OK)
+		    {
+			    xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+			    return ret;
+		    }
 			return ret;
+	  }
+	  ret = cmd_reply_AcqusionRet(0x03,0x11,0x0);//接收到开始回放指令，且已经准备好开始回放。
+	  if (ret != FR_OK)
+	  {
+		  xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+		  return ret;
 	  }
 	  size=((f_size(&rfile)%4)==0?f_size(&rfile):(f_size(&rfile)/4+1)*4);
 	  len=size;
@@ -3056,6 +3170,13 @@ int run_cmd_d205_2(BYTE* name,int read_time,uint8_t mode)
 			if (ret != FR_OK)
 			{
 					xil_printf("f_read Failed! ret=%d\r\n", ret);
+					usleep(100000);
+					ret = cmd_reply_AcqusionRet(0x04,0x11,0x1);//接收到停止回放指令，且已经准备好停止回放。
+					if (ret != FR_OK)
+					{
+						xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+						return ret;
+					}
 					return ret;
 			}
 			r_count++;
@@ -3134,6 +3255,13 @@ int run_cmd_d205_2(BYTE* name,int read_time,uint8_t mode)
 		 xil_printf(" f_close Failed! %d\r\n",ret);
 		 return ret;
 	 }
+	 usleep(100000);
+	 ret = cmd_reply_AcqusionRet(0x04,0x11,0x1);//接收到停止回放指令，且已经准备好停止回放。
+	 if (ret != FR_OK)
+	 {
+		 xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+		 return ret;
+	 }
 	 return 0;
 }
 
@@ -3155,7 +3283,18 @@ int run_cmd_d205_8x(BYTE* name)
 	  if (ret != FR_OK)
 	  {
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
-			//cmd_reply_a203_to_a201(pMsg->PackNum,pMsg->HandType,pMsg->HandId,0x10);  // lyh 2023.8.15
+	  		ret = cmd_reply_AcqusionRet(0x03,0x10,0x0);//接收到开始回放指令，但是没有准备好开始回放。
+			if (ret != FR_OK)
+			{
+				xil_printf("reply  Acqusion_Result Failed! ret=%d\r\n", ret);
+				return ret;
+			}
+			return ret;
+	  }
+	  ret = cmd_reply_AcqusionRet(0x03,0x11,0x0);//接收到开始回放指令，且已经准备好开始回放。
+	  if (ret != FR_OK)
+	  {
+			xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
 			return ret;
 	  }
 	  size=((f_size(&rfile)%4)==0?f_size(&rfile):(f_size(&rfile)/4+1)*4);
@@ -3193,6 +3332,13 @@ int run_cmd_d205_8x(BYTE* name)
 			if (ret != FR_OK)
 			{
 					xil_printf("f_read Failed! ret=%d\r\n", ret);
+					usleep(100000);
+					ret = cmd_reply_AcqusionRet(0x04,0x11,0x1);// 准备好停止回放。
+					if (ret != FR_OK)
+					{
+						xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+						return ret;
+					}
 					return ret;
 			}
 			r_count++;
@@ -3292,6 +3438,13 @@ int run_cmd_d205_8x(BYTE* name)
 		 xil_printf(" f_close Failed! %d\r\n",ret);
 		 return ret;
 	 }
+	 usleep(100000);
+	 ret = cmd_reply_AcqusionRet(0x04,0x11,0x1);//接收到停止回放指令，且已经准备好停止回放。
+	 if (ret != FR_OK)
+	 {
+		xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+		return ret;
+	 }
 	 return 0;
 }
 
@@ -3313,8 +3466,19 @@ int run_cmd_d205_2_8x(BYTE* name,int read_time)
 	 if (ret != FR_OK)
 	 {
 			xil_printf("f_open Failed! ret=%d\r\n", ret);
-			//cmd_reply_a203_to_a201(pMsg->PackNum,pMsg->HandType,pMsg->HandId,0x10);  // lyh 2023.8.15
+			ret = cmd_reply_AcqusionRet(0x03,0x10,0x0);//接收到开始回放指令，但是没有准备好。
+			if (ret != FR_OK)
+			{
+				xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+				return ret;
+			}		
 			return ret;
+	  }
+	  ret = cmd_reply_AcqusionRet(0x03,0x11,0x0);//接收到开始回放指令，且已经准备好开始回放。
+	  if (ret != FR_OK)
+	  {
+		  xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+		  return ret;
 	  }
 	  size=((f_size(&rfile)%4)==0?f_size(&rfile):(f_size(&rfile)/4+1)*4);
 	  len=size;
@@ -3352,6 +3516,13 @@ int run_cmd_d205_2_8x(BYTE* name,int read_time)
 			if (ret != FR_OK)
 			{
 					xil_printf("f_read Failed! ret=%d\r\n", ret);
+					usleep(100000);
+					ret = cmd_reply_AcqusionRet(0x04,0x11,0x1);//接收到停止回放指令，且已经准备好停止回放。
+					if (ret != FR_OK)
+					{
+						xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
+						return ret;
+					}
 					return ret;
 			}
 			r_count++;
@@ -3433,6 +3604,14 @@ int run_cmd_d205_2_8x(BYTE* name,int read_time)
 	 if (ret != FR_OK)
 	 {
 		 xil_printf(" f_close Failed! %d\r\n",ret);
+	 
+		 return ret;
+	 }
+	 usleep(100000);
+	 ret = cmd_reply_AcqusionRet(0x04,0x11,0x1);//接收到停止回放指令，且已经准备好停止回放。
+	 if (ret != FR_OK)
+	 {
+		 xil_printf("reply Acqusion_Result Failed! ret=%d\r\n", ret);
 		 return ret;
 	 }
 	 return 0;
@@ -3580,7 +3759,7 @@ int run_cmd_d204(StructMsg *pMsg)
 /*****************导出文件数据到本地命令*******************/
 int run_cmd_d208(BYTE* name,uint8_t mode)
 {
-	  int i=0,x=0,Status,ret,h=0,time=1;
+	  int i=0,Status,ret,h=0,time=1;
 	  uint8_t sts=0;
 	  int64_t size=0,LastPack_Size=0;
 	  int br;
@@ -3729,12 +3908,12 @@ int run_cmd_d208(BYTE* name,uint8_t mode)
 //******导出文件数据到本地命令*******//
 int run_cmd_d207(StructMsg *pMsg)
 {
-     int temp=0,ret=0,i=0,x=0,h=0;
+     int temp=0,i=0,x=0,h=0;
 	 int Read_mode=0;
 	 u16 unicode_u16=0;
 	 WCHAR cmd_str_1[1024]={0};
 	 BYTE cmd_str_11[100]={0};
-	 FIL file;
+
 
      for (x = 0; x < 1024; x++)
      {

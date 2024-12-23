@@ -213,6 +213,20 @@ typedef struct
 	u32		Tail;
 }__attribute__((__packed__))  StructHealthStatus;
 
+typedef struct
+{
+	u32		Head;
+	u32		SrcId;
+	u32		DestId;
+	u32		HandType;
+	u32		HandId;
+	u32		PackNum;
+	u32		AckStateRet;
+	u32		mode; // mode=1,qt代码里判断iswaitingresponse参数不起作用
+	u32		backups[6];
+	u32		CheckCode;
+	u32		Tail;
+}__attribute__((__packed__))  StructAcqusionRet;
 int run_cmd_a201(StructMsg *pMsg);
 int cmd_reply_a203(u32 packnum, u32 type, u32 id, u32 result);
 u64 Reverse_u64(u64 element);
