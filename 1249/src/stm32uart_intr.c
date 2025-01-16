@@ -54,77 +54,72 @@
 * </pre>
 ******************************************************************************/
 
+
 /***************************** Include Files *********************************/
 
+
+#include "xaxidma.h"
 #include "xparameters.h"
+#include "xil_exception.h"
+#include "xdebug.h"
 #include "xuartlite.h"
-#include "xintc.h"
 #include "xil_exception.h"
 #include "xil_printf.h"
 #include "simple_dma.h"
 #include "cmd.h"
 #include "xuartlite_l.h"
-/************************** Constant Definitions *****************************/
+#include "Ring_Buffer/ringbuffer_u8.h"
+#ifdef XPAR_UARTNS550_0_BASEADDR
+#include "xuartns550_l.h"       /* to use uartns550 */
+#endif
 
+
+#ifdef XPAR_INTC_0_DEVICE_ID
+#include "xintc.h"
+#else
+ #include "xscugic.h"
+#endif
+
+/************************** Constant Definitions *****************************/
 /*
  * The following constants map to the XPAR parameters created in the
  * xparameters.h file. They are defined here such that a user can easily
  * change all the needed parameters in one place.
  */
-#define UARTLITE_DEVICE_ID      XPAR_UARTLITE_2_DEVICE_ID
+#define UARTLITE_DEVICE_ID      XPAR_UARTLITE_2_DEVICE_ID   //XPAR_UARTLITE_2_DEVICE_ID
 #define INTC_DEVICE_ID          XPAR_INTC_0_DEVICE_ID
-#define UARTLITE_INT_IRQ_ID     XPAR_INTC_0_UARTLITE_0_VEC_ID
+#define UARTLITE_INT_IRQ_ID     XPAR_INTC_0_UARTLITE_2_VEC_ID
 
+#define INTC		XIntc
+#define INTC_HANDLER	XIntc_InterruptHandler
 /*
  * The following constant controls the length of the buffers to be sent
  * and received with the UartLite device.
  */
 #define TEST_BUFFER_SIZE        100
-
+#define RX_NOEMPTY XUL_SR_RX_FIFO_VALID_DATA // 接收 FIFO 非空
 #define UART_TX_BUFFER_BASE		(0x80000000 + 0x00900000)
 u8 *UartRxBufferPtr;
+INTC Intc;
+extern uint8_t FinishFLAG;
+extern uint32_t slotNum;
+extern uint32_t temper_power;
+XUartLite UartLite;            /* The instance of the UartLite Device */
 
-
-/**************************** Type Definitions *******************************/
-
-
-/***************** Macros (Inline Functions) Definitions *********************/
-
+#define  buffersize   64
+u8 UartRxBuffer[buffersize]={0};
+u8_ring_buffer_t rb_handler={0};
 
 /************************** Function Prototypes ******************************/
 
-int SetupInterruptSystem(XUartLite *UartLitePtr);
-
-/************************** Variable Definitions *****************************/
-
- XUartLite UartLite;            /* The instance of the UartLite Device */
-
-// XIntc InterruptController;     /* The instance of the Interrupt Controller */
- extern INTC Intc;	/* Instance of the Interrupt Controller */
-
-/*
- * The following variables are shared between non-interrupt processing and
- * interrupt processing such that they must be global.
- */
-
-/*
- * The following buffers are used in this example to send and receive data
- * with the UartLite.
- */
-//u8 SendBuffer[TEST_BUFFER_SIZE];
-//u8 ReceiveBuffer[TEST_BUFFER_SIZE];
-#define RX_NOEMPTY XUL_SR_RX_FIFO_VALID_DATA // 接收 FIFO 非空
-/*
- * The following counters are used to determine when the entire buffer has
- * been sent and received.
- */
-static volatile int TotalReceivedCount;
-static volatile int TotalSentCount;
+int SetupInterruptSystem1(XUartLite *UartLitePtr);
+int SetupIntrUartSystem(INTC * IntcInstancePtr,XUartLite *UartLitePtr, u16 IntrId);
 
 int UartLiteIntr(void)
 {
 	int Status;
-	UartRxBufferPtr = (u8 *)UART_TX_BUFFER_BASE;
+//	UartRxBufferPtr = (u8 *)UART_TX_BUFFER_BASE;
+	u8_ring_buffer_init(&rb_handler,UartRxBuffer,buffersize);
 	/*
 	 * Initialize the UartLite driver so that it's ready to use.
 	 */
@@ -137,7 +132,7 @@ int UartLiteIntr(void)
 	 * Connect the UartLite to the interrupt subsystem such that interrupts can
 	 * occur. This function is application specific.
 	 */
-	Status = SetupInterruptSystem(&UartLite);
+	Status = SetupIntrUartSystem(&Intc,&UartLite,UARTLITE_INT_IRQ_ID);
 	if (Status != XST_SUCCESS) {
 		return XST_FAILURE;
 	}
@@ -159,7 +154,13 @@ int UartLiteIntr(void)
 void uart_handler(void *CallbackRef)//中断处理函数
 {
     u8 Read_data;
+    u8 header[4] = {0};
+    u8 type[4] = {0};
+    u8 result[4] = {0};
+//    u8 slot[4] = {0};
+    u8 tail[4] = {0};
     u32 isr_status;
+    int ret = 0;
     XUartLite *InstancePtr= (XUartLite *)CallbackRef;
     //读取状态寄存器
     isr_status = XUartLite_ReadReg(InstancePtr->RegBaseAddress ,
@@ -168,13 +169,128 @@ void uart_handler(void *CallbackRef)//中断处理函数
     	//读取数据
         Read_data=XUartLite_ReadReg(InstancePtr->RegBaseAddress ,
                                     XUL_RX_FIFO_OFFSET);
-        //发送数据
-        XUartLite_WriteReg(InstancePtr->RegBaseAddress ,
-                           XUL_TX_FIFO_OFFSET, Read_data);
+        u8_ring_buffer_queue_arr(&rb_handler, &Read_data, 1);
+//        //发送数据
+//        XUartLite_WriteReg(InstancePtr->RegBaseAddress ,
+//                           XUL_TX_FIFO_OFFSET, Read_data);
+        if(u8_ring_buffer_num_items(&rb_handler) >= 16) // 接收满一帧数据
+        {
+        	ret = u8_ring_buffer_dequeue_arr(&rb_handler, header, 4);
+			if(ret != 4)
+			{
+				xil_printf("read ring buffer fail \r\n");
+				return ret;
+			}
+			else
+			{
+				if(0x55555555==CW32(header[0],header[1],header[2],header[3]))
+				{
+					 ret = u8_ring_buffer_dequeue_arr(&rb_handler, type, 4);
+					 if(ret != 4)
+					 {
+						xil_printf("read ring buffer fail \r\n");
+						return ret;
+					 }
+					 ret = u8_ring_buffer_dequeue_arr(&rb_handler, result, 4);
+					 if(ret != 4)
+					 {
+						xil_printf("read ring buffer fail \r\n");
+						return ret;
+					 }
+					 ret = u8_ring_buffer_dequeue_arr(&rb_handler, tail, 4);
+					 if(ret != 4)
+					 {
+						xil_printf("read ring buffer fail \r\n");
+						return ret;
+					 }
+					 else
+					 {
+						 if(0xAAAAAAAA==CW32(tail[0],tail[1],tail[2],tail[3]))
+						 {
+							  if(0xA5==CW32(type[0],type[1],type[2],type[3]))
+							  {
+								  FinishFLAG=0x1;
+								  slotNum=CW32(result[0],result[1],result[2],result[3]);
+								  xil_printf("slotNum:%u\r\n",slotNum);
+							  }
+							  else if(0xC5==CW32(type[0],type[1],type[2],type[3]))
+							  {
+								  FinishFLAG=0x1;
+								  temper_power=CW32(result[0],result[1],result[2],result[3]);
+								  xil_printf("temper_power:%x\r\n",temper_power);
+							  }
+						 }
+				     }
+				}
+			}
+        }
+    }
+}
+void uart_handler1(void *CallbackRef)//中断处理函数
+{
+    u8 Read_data;
+    u8 header[4] = {0};
+    u8 slot[4] = {0};
+    u8 tail[4] = {0};
+    u32 isr_status;
+    int ret = 0;
+    XUartLite *InstancePtr= (XUartLite *)CallbackRef;
+    //读取状态寄存器
+    isr_status = XUartLite_ReadReg(InstancePtr->RegBaseAddress ,
+                                   XUL_STATUS_REG_OFFSET);
+    if(isr_status & RX_NOEMPTY){ //接收 FIFO 中有数据
+    	//读取数据
+        Read_data=XUartLite_ReadReg(InstancePtr->RegBaseAddress ,
+                                    XUL_RX_FIFO_OFFSET);
+        u8_ring_buffer_queue_arr(&rb_handler, &Read_data, 1);
+//        //发送数据
+//        XUartLite_WriteReg(InstancePtr->RegBaseAddress ,
+//                           XUL_TX_FIFO_OFFSET, Read_data);
+        if(u8_ring_buffer_num_items(&rb_handler) >= 12) // 接收满一帧数据
+        {
+        	ret = u8_ring_buffer_dequeue_arr(&rb_handler, header, 4);
+			if(ret != 4)
+			{
+				xil_printf("read ring buffer fail \r\n");
+				return ret;
+			}
+			else
+			{
+				if(0x55555555==CW32(header[0],header[1],header[2],header[3]))
+				{
+					 ret = u8_ring_buffer_dequeue_arr(&rb_handler, slot, 4);
+					 if(ret != 4)
+					 {
+						xil_printf("read ring buffer fail \r\n");
+						return ret;
+					 }
+					 ret = u8_ring_buffer_dequeue_arr(&rb_handler, tail, 4);
+					 if(ret != 4)
+					 {
+						xil_printf("read ring buffer fail \r\n");
+						return ret;
+					 }
+					 else
+					 {
+						 if(0xAAAAAAAA==CW32(tail[0],tail[1],tail[2],tail[3]))
+						 {
+
+							  FinishFLAG=0x1;
+							  slotNum=CW32(slot[0],slot[1],slot[2],slot[3]);
+						 }
+				     }
+				}
+			}
+        }
     }
 }
 
-
+int SendToMcu(XUartLite *drive,u8 data)
+{
+//	XUartLite_WriteReg(drive->RegBaseAddress,
+//			                           XUL_TX_FIFO_OFFSET, data);
+	XUartLite_SendByte(drive->RegBaseAddress,data);
+}
 
 /****************************************************************************/
 /**
@@ -194,7 +310,74 @@ void uart_handler(void *CallbackRef)//中断处理函数
 * @note     None.
 *
 ****************************************************************************/
-int SetupInterruptSystem(XUartLite *UartLitePtr)
+int SetupIntrUartSystem(INTC * IntcInstancePtr,
+		 XUartLite *UartLitePtr, u16 IntrId)
+{
+		int Status;
+
+		/* Initialize the interrupt controller and connect the ISRs */
+		do
+		{
+			Status = XIntc_Initialize(IntcInstancePtr, INTC_DEVICE_ID);
+			if (Status != XST_SUCCESS) {
+
+				xil_printf("Failed init intc\r\n");
+				return XST_FAILURE;
+			}
+			usleep(100000);
+		} while(Status != XST_SUCCESS);
+
+		/*
+		 * Connect a device driver handler that will be called when an interrupt
+		 * for the device occurs, the device driver handler performs the
+		 * specific interrupt processing for the device.
+		 */
+		Status = XIntc_Connect(IntcInstancePtr, IntrId,
+				   (XInterruptHandler)uart_handler,
+				   (void *)UartLitePtr);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		/*
+		 * Start the interrupt controller such that interrupts are enabled for
+		 * all devices that cause interrupts, specific real mode so that
+		 * the UartLite can cause interrupts through the interrupt controller.
+		 */
+		Status = XIntc_Start(IntcInstancePtr, XIN_REAL_MODE);
+		if (Status != XST_SUCCESS) {
+			return XST_FAILURE;
+		}
+
+		/*
+		 * Enable the interrupt for the UartLite device.
+		 */
+		XIntc_Enable(IntcInstancePtr, IntrId);
+
+		/*
+		 * Initialize the exception table.
+		 */
+		Xil_ExceptionInit();
+
+		/*
+		 * Register the interrupt controller handler with the exception table.
+		 */
+		Xil_ExceptionRegisterHandler(XIL_EXCEPTION_ID_INT,
+				 (Xil_ExceptionHandler)XIntc_InterruptHandler,
+				 IntcInstancePtr);
+
+		/*
+		 * Enable exceptions.
+		 */
+		Xil_ExceptionEnable();
+
+		return XST_SUCCESS;
+}
+
+
+
+
+int SetupInterruptSystem1(XUartLite *UartLitePtr)
 {
 
 	int Status;

@@ -229,7 +229,7 @@ XAxiDma AxiDma1; 								   //tcp dma
 
 
 //static INTC Intc;	/* Instance of the Interrupt Controller */
-INTC Intc;	/* Instance of the Interrupt Controller */
+extern INTC Intc;	/* Instance of the Interrupt Controller */
 /*
  * Flags interrupt handlers use to notify the application context the events.
  */

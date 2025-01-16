@@ -37,14 +37,19 @@
 #include "xil_cache.h"
 #include "xil_io.h"
 #include "cmd.h"
+#include "xuartlite.h"
+#include "Ring_Buffer/ringbuffer_u8.h"
 
 extern StructMsg			CurMsg;
 extern StructMsgQuery		MsgQuery;
 extern uint32_t Stop_flag;
 extern uint8_t flag_1x;
 extern uint8_t flag_tcp;
+extern XUartLite UartLite;
 uint8_t sts=0;
-//uint8_t FLAG=0;
+uint8_t FinishFLAG=0;
+uint32_t slotNum=0;
+uint32_t temper_power=0;
 extern uint8_t rxflag;
 extern uint8_t Stop_write;
 #define CLEAN_PARAM   do{flag_1x=0;flag_tcp=0;Stop_write=0;}while(0)
@@ -69,10 +74,11 @@ int main()
 #if   1
 		init_platform();
 		MsgQueryInit();
+		XLLFIFO_SysInit();
+		UartLiteIntr();
 		SimpleTcpDmaInit();
 		Simple1xDmaInit();
-		UartLiteIntr();
-		XLLFIFO_SysInit();
+
 		DiskInit();
 //		write_data();
 //		read_data();
@@ -225,17 +231,39 @@ int main()
 				break;
 
 				case 0XB2:
-					xil_printf("%s %d  CurMsg.HandType:0x%x\r\n", __FUNCTION__, __LINE__,CurMsg.HandType);
-					xil_printf("------Start executing commands!------\r\n");
-					ret=run_cmd_b201(&CurMsg);
-					if(ret!=0)
+					switch(CurMsg.HandId)
 					{
-						xil_printf("------commands executing failed!------ ret=%d\r\n",ret);
-						cmd_reply_a203(CurMsg.PackNum,CurMsg.HandType,CurMsg.HandId,0x10);
+ 						case 0x1:
+							xil_printf("%s %d  CurMsg.HandType:0x%x\r\n", __FUNCTION__, __LINE__,CurMsg.HandType);
+							xil_printf("------Start executing commands!------\r\n");
+							ret=run_cmd_b201(&CurMsg);
+							if(ret!=0)
+							{
+								xil_printf("------commands executing failed!------ ret=%d\r\n",ret);
+								cmd_reply_a203(CurMsg.PackNum,CurMsg.HandType,CurMsg.HandId,0x10);
+								break;
+							}
+							cmd_reply_a203(CurMsg.PackNum,CurMsg.HandType,CurMsg.HandId,0x11);
+							xil_printf("------commands executing complete!------\r\n");
 						break;
+
+ 						case 0x2:
+							xil_printf("%s %d  CurMsg.HandType:0x%x\r\n", __FUNCTION__, __LINE__,CurMsg.HandType);
+							xil_printf("------Start executing commands!------\r\n");
+							ret=run_cmd_b202(&CurMsg);
+							if(ret!=0)
+							{
+								xil_printf("------commands executing failed!------ ret=%d\r\n",ret);
+//								cmd_reply_a203(CurMsg.PackNum,CurMsg.HandType,CurMsg.HandId,0x10);
+								break;
+							}
+//							cmd_reply_a203(CurMsg.PackNum,CurMsg.HandType,CurMsg.HandId,0x11);
+							xil_printf("------commands executing complete!------\r\n");
+						break;
+
+ 						default:
+ 							break;
 					}
-					cmd_reply_a203(CurMsg.PackNum,CurMsg.HandType,CurMsg.HandId,0x11);
-					xil_printf("------commands executing complete!------\r\n");
 				break;
 
 				case 0XD2:

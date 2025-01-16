@@ -234,9 +234,24 @@ void cmd_type_id_parse(StructMsg *pMsg)
 					}
 				break;
 				case 0xb2:
-					for(i=0; i < TMsg.DataLen; i++)
-					{
-						TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
+					switch(pMsg->HandId)
+				    {
+					    case 0x1:
+							for(i=0; i < TMsg.DataLen; i++)
+							{
+								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
+							}
+						break;
+
+					    case 0x2:
+					    	for(i=0; i < TMsg.DataLen; i++)
+							{
+								TMsg.MsgData[i] = CmdRxBufferPtr[i+24];
+							}
+						break;
+					    default:
+							return 0;
+						break;
 					}
 				break;
 
@@ -2495,6 +2510,43 @@ int run_cmd_b201(StructMsg *pMsg)
 	return 0;
 }
 
+int run_cmd_b202(StructMsg *pMsg)
+{
+		int IPADDR=0,ret=0,i=0;
+		u32 sendBuffer[3]={0};
+		IPADDR = CW32(pMsg->MsgData[i+0],pMsg->MsgData[i+1],pMsg->MsgData[i+2],pMsg->MsgData[i+3]);
+		switch(IPADDR)
+		{
+			case 1:
+				sendBuffer[0]=0x00000000;
+				sendBuffer[1]=0x55AA55AA;
+				sendBuffer[2]=0x1;
+			break;
+
+			case 2:
+				sendBuffer[0]=0x00000000;
+				sendBuffer[1]=0x55AA55AA;
+				sendBuffer[2]=0x2;
+			break;
+
+			case 3:
+				sendBuffer[0]=0x00000000;
+				sendBuffer[1]=0x55AA55AA;
+				sendBuffer[2]=0x3;
+			break;
+
+			case 4:
+				sendBuffer[0]=0x00000000;
+				sendBuffer[1]=0x55AA55AA;
+				sendBuffer[2]=0x4;
+			break;
+
+			default:
+				break;
+		}
+		TxSend(sendBuffer,12);
+		return 0;
+}
 
 int run_cmd_d201(StructMsg *pMsg)
 {

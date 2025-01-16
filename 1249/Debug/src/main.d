@@ -14,7 +14,10 @@ src/main.o src/main.o: ../src/main.c \
  ../../1249_bsp/microblaze_1/include/bspconfig.h ../src/cmd.h \
  ../../1249_bsp/microblaze_1/include/xbasic_types.h \
  ../../1249_bsp/microblaze_1/include/xstatus.h ../src/mem_test.h \
- ../src/xllfifo_drv.h ../src/FIFO.h
+ ../src/xllfifo_drv.h ../src/FIFO.h \
+ ../../1249_bsp/microblaze_1/include/xuartlite.h \
+ ../../1249_bsp/microblaze_1/include/xstatus.h \
+ ../src/Ring_Buffer/ringbuffer_u8.h
 
 ../../1249_bsp/microblaze_1/include/xparameters.h:
 
@@ -65,3 +68,9 @@ src/main.o src/main.o: ../src/main.c \
 ../src/xllfifo_drv.h:
 
 ../src/FIFO.h:
+
+../../1249_bsp/microblaze_1/include/xuartlite.h:
+
+../../1249_bsp/microblaze_1/include/xstatus.h:
+
+../src/Ring_Buffer/ringbuffer_u8.h:
