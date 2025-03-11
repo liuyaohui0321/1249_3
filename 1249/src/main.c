@@ -49,6 +49,7 @@ extern XUartLite UartLite;
 uint8_t sts=0;
 uint8_t FinishFLAG=0;
 uint32_t slotNum=0;
+uint32_t equipNum=0;
 uint32_t temper_power=0;
 extern uint8_t rxflag;
 extern uint8_t Stop_write;
@@ -76,10 +77,17 @@ int main()
 		MsgQueryInit();
 		XLLFIFO_SysInit();
 		UartLiteIntr();
+		SendToMcu(&UartLite,0xA5);//获取槽位号的指令
+		while(FinishFLAG==0x0)
+		{
+			i++;
+			if(i>0x200000) break;  //超时退出
+		}
 		SimpleTcpDmaInit();
 		Simple1xDmaInit();
 
 		DiskInit();
+		IpSet(equipNum,slotNum);
 //		write_data();
 //		read_data();
 #if     10

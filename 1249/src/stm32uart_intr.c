@@ -103,6 +103,7 @@ u8 *UartRxBufferPtr;
 INTC Intc;
 extern uint8_t FinishFLAG;
 extern uint32_t slotNum;
+extern uint32_t equipNum;
 extern uint32_t temper_power;
 XUartLite UartLite;            /* The instance of the UartLite Device */
 
@@ -160,12 +161,14 @@ void uart_handler(void *CallbackRef)//中断处理函数
 //    u8 slot[4] = {0};
     u8 tail[4] = {0};
     u32 isr_status;
+	u32 value=0;
     int ret = 0;
     XUartLite *InstancePtr= (XUartLite *)CallbackRef;
     //读取状态寄存器
     isr_status = XUartLite_ReadReg(InstancePtr->RegBaseAddress ,
                                    XUL_STATUS_REG_OFFSET);
-    if(isr_status & RX_NOEMPTY){ //接收 FIFO 中有数据
+    if(isr_status & RX_NOEMPTY)//接收 FIFO 中有数据
+	{ 
     	//读取数据
         Read_data=XUartLite_ReadReg(InstancePtr->RegBaseAddress ,
                                     XUL_RX_FIFO_OFFSET);
@@ -210,14 +213,19 @@ void uart_handler(void *CallbackRef)//中断处理函数
 							  if(0xA5==CW32(type[0],type[1],type[2],type[3]))
 							  {
 								  FinishFLAG=0x1;
-								  slotNum=CW32(result[0],result[1],result[2],result[3]);
-								  xil_printf("slotNum:%u\r\n",slotNum);
+								  value=CW32(result[0],result[1],result[2],result[3]);
+								  slotNum = (u8)(value >> 16);
+								  equipNum = (u8)(value & 0xFFFF);
+								  xil_printf("equipNum::%u slotNum:%u\r\n",equipNum,slotNum);
 							  }
 							  else if(0xC5==CW32(type[0],type[1],type[2],type[3]))
 							  {
 								  FinishFLAG=0x1;
 								  temper_power=CW32(result[0],result[1],result[2],result[3]);
-								  xil_printf("temper_power:%x\r\n",temper_power);
+//								  xil_printf("temper_power:%u \r\n",temper_power);
+								  u16 power=(u16)(temper_power);
+								  u16 temper=(u16)(temper_power>>16);
+								  xil_printf("power:%u W  temper:%u .c  \r\n",power,temper);
 							  }
 						 }
 				     }

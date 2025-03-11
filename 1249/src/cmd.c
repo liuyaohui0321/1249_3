@@ -4120,6 +4120,61 @@ void Internal_count(uint32_t *LEN,uint32_t *TIME,uint32_t *LastSize,uint32_t *Le
 	  *LastSize=lastSize;
 	  *Length=length;
 }
+//equip:1 slot:9  ->192.168.0.32
+//equip:1 slot:11 ->192.168.0.33
+//equip:2 slot:9  ->192.168.0.34
+//equip:2 slot:11 ->192.168.0.35
+int IpSet(int equip,int slot)
+{
+		int IPADDR=0,ret=0,i=0;
+		u32 sendBuffer[3]={0};
+		if(equip==0x1 && slot==11)
+		{
+			IPADDR=0x1;
+		}
+		else if(equip==0x2 && slot==9)
+		{
+			IPADDR=0x2;
+		}
+		else if(equip==0x2 && slot==11)
+		{
+			IPADDR=0x3;
+		}
+
+
+		switch(IPADDR)
+		{
+			case 1:
+				sendBuffer[0]=0x00000000;
+				sendBuffer[1]=0x55AA55AA;
+				sendBuffer[2]=0x1;
+			break;
+
+			case 2:
+				sendBuffer[0]=0x00000000;
+				sendBuffer[1]=0x55AA55AA;
+				sendBuffer[2]=0x2;
+			break;
+
+			case 3:
+				sendBuffer[0]=0x00000000;
+				sendBuffer[1]=0x55AA55AA;
+				sendBuffer[2]=0x3;
+			break;
+
+//			case 4:
+//				sendBuffer[0]=0x00000000;
+//				sendBuffer[1]=0x55AA55AA;
+//				sendBuffer[2]=0x4;
+//			break;
+
+			default:
+				break;
+		}
+
+		TxSend(sendBuffer,12);
+		return 0;
+}
 void Reply_REMAIN_SPACE(void)
 {
 	uint64_t used_Cap=0;
